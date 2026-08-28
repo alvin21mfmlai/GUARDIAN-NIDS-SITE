@@ -1,0 +1,2177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GUARDIAN-NIDS</title>
+<meta name="description" content="GUARDIAN-NIDS — a reproducible, config-driven framework benchmarking classical, neural and ensemble models for network intrusion detection across six datasets, with a from-scratch NumPy Random Forest deployment path.">
+<meta name="author" content="Chew Wei Ze Alvin">
+<meta property="og:title" content="GUARDIAN-NIDS">
+<meta property="og:description" content="A six-benchmark evaluation of classical, neural and ensemble models for network intrusion detection — plus a library-free Random Forest deployment bundle.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0f18'/%3E%3Cpath d='M16 5l8 3v7.5c0 5.2-3.3 9.2-8 11.5-4.7-2.3-8-6.3-8-11.5V8z' fill='none' stroke='%2334e5c8' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M11.5 16.2l3 3 6-6.4' fill='none' stroke='%2334e5c8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<style>
+/* ============================================================
+   GUARDIAN-NIDS — design tokens
+   ============================================================ */
+:root{
+  --bg:            #070a11;
+  --bg-2:          #0b111b;
+  --panel:         #0e1521;
+  --panel-2:       #121b29;
+  --line:          #1d2839;
+  --line-soft:     #16202e;
+  --ink:           #e8eef7;
+  --ink-2:         #a9bacd;
+  --ink-3:         #7e91aa;
+  --teal:          #34e5c8;
+  --teal-dim:      #1d8f7e;
+  --blue:          #6ea8fe;
+  --violet:        #a78bfa;
+  --amber:         #f6b73c;
+  --rose:          #f2637f;
+  --radius:        14px;
+  --radius-sm:     9px;
+  --maxw:          1180px;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.7);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:86px; -webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.65;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *{animation-duration:.001ms !important; transition-duration:.001ms !important}
+}
+img,svg{max-width:100%}
+a{color:var(--teal); text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--teal); outline-offset:3px; border-radius:4px}
+
+h1,h2,h3,h4{line-height:1.2; margin:0; letter-spacing:-.02em; font-weight:700}
+p{margin:0 0 1em}
+p:last-child{margin-bottom:0}
+
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px}
+.mono{font-family:var(--mono)}
+.muted{color:var(--ink-2)}
+.dim{color:var(--ink-3)}
+.nowrap{white-space:nowrap}
+
+/* ---------- skip link ---------- */
+.skip{position:absolute; left:-9999px; top:0; background:var(--teal); color:#04140f;
+  padding:10px 16px; border-radius:0 0 8px 0; font-weight:700; z-index:200}
+.skip:focus{left:0}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav{
+  position:sticky; top:0; z-index:100;
+  background:rgba(7,10,17,.82); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line-soft);
+}
+.nav-in{max-width:var(--maxw); margin:0 auto; padding:0 24px;
+  height:62px; display:flex; align-items:center; gap:22px}
+.brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-.02em;
+  color:var(--ink); font-size:15px; flex:none}
+.brand:hover{text-decoration:none}
+.brand svg{width:22px; height:22px; flex:none}
+.brand .b-sub{color:var(--ink-3); font-weight:500; font-size:12px; letter-spacing:.06em;
+  text-transform:uppercase; border-left:1px solid var(--line); padding-left:10px; margin-left:2px}
+.nav-links{display:flex; gap:2px; overflow-x:auto; scrollbar-width:none; margin-left:auto}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{
+  color:var(--ink-2); font-size:13.5px; font-weight:500; padding:7px 11px;
+  border-radius:8px; white-space:nowrap; transition:color .15s, background .15s;
+}
+.nav-links a:hover{color:var(--ink); background:var(--panel-2); text-decoration:none}
+.nav-links a.on{color:var(--teal); background:rgba(52,229,200,.08)}
+@media (max-width:820px){ .brand .b-sub{display:none} .nav-in{gap:12px} }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{position:relative; overflow:hidden; border-bottom:1px solid var(--line-soft);
+  padding:86px 0 66px; background:var(--bg)}
+.hero::before,.hero::after{content:""; position:absolute; border-radius:50%; filter:blur(90px);
+  pointer-events:none; z-index:0}
+.hero::before{width:640px; height:640px; top:-300px; left:-160px;
+  background:radial-gradient(circle, rgba(52,229,200,.20), transparent 68%)}
+.hero::after{width:700px; height:700px; top:-240px; right:-260px;
+  background:radial-gradient(circle, rgba(110,168,254,.16), transparent 68%)}
+.hero-grid-bg{position:absolute; inset:0; z-index:0; opacity:.5;
+  background-image:linear-gradient(var(--line-soft) 1px, transparent 1px),
+                   linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 78%);
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 78%);
+}
+.hero .wrap{position:relative; z-index:1}
+.eyebrow{display:inline-flex; align-items:center; gap:9px; font-family:var(--mono);
+  font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--teal);
+  background:rgba(52,229,200,.07); border:1px solid rgba(52,229,200,.22);
+  padding:6px 13px; border-radius:100px; margin-bottom:26px}
+.eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--teal);
+  box-shadow:0 0 0 3px rgba(52,229,200,.18)}
+h1.title{font-size:clamp(2.6rem,7vw,4.6rem); font-weight:800; letter-spacing:-.045em; margin:0 0 6px}
+h1.title .g{background:linear-gradient(100deg,#e8eef7 10%,var(--teal) 55%,var(--blue) 95%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent}
+.title-sub{font-size:clamp(1.02rem,2.1vw,1.32rem); color:var(--ink-2); font-weight:500;
+  max-width:820px; margin:14px 0 0; line-height:1.55}
+.hero-note{margin-top:26px; color:var(--ink-3); font-size:14px; max-width:760px}
+.hero-cta{display:flex; flex-wrap:wrap; gap:12px; margin-top:34px}
+.btn{display:inline-flex; align-items:center; gap:9px; padding:11px 19px; border-radius:10px;
+  font-size:14.5px; font-weight:600; border:1px solid var(--line); color:var(--ink);
+  background:var(--panel); transition:.16s; cursor:pointer}
+.btn:hover{text-decoration:none; border-color:#2c3c53; background:var(--panel-2); transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(180deg,#3ff0d2,#22c9ae); color:#03120e; border-color:transparent; font-weight:700}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn svg{width:16px; height:16px; flex:none}
+
+/* stat strip */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:1px;
+  margin-top:52px; background:var(--line-soft); border:1px solid var(--line-soft);
+  border-radius:var(--radius); overflow:hidden}
+.stat{background:var(--bg-2); padding:20px 18px}
+.stat .v{font-family:var(--mono); font-size:clamp(1.5rem,3.2vw,1.95rem); font-weight:700;
+  color:var(--ink); letter-spacing:-.03em; line-height:1.1}
+.stat .v em{font-style:normal; color:var(--teal)}
+.stat .l{font-size:11.5px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.09em;
+  margin-top:7px; font-weight:600}
+
+/* ============================================================
+   SECTION SHELL
+   ============================================================ */
+section{padding:82px 0; border-bottom:1px solid var(--line-soft); position:relative}
+section.alt{background:var(--bg-2)}
+.sec-head{max-width:800px; margin-bottom:44px}
+.sec-num{font-family:var(--mono); font-size:11.5px; letter-spacing:.16em; color:var(--teal);
+  text-transform:uppercase; font-weight:600; display:block; margin-bottom:12px}
+h2.sec-title{font-size:clamp(1.7rem,3.6vw,2.4rem); letter-spacing:-.035em; margin-bottom:14px}
+.sec-lede{font-size:clamp(1rem,1.6vw,1.1rem); color:var(--ink-2); line-height:1.62}
+
+h3.sub{font-size:1.14rem; margin:0 0 14px; letter-spacing:-.02em}
+h4.mini{font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--ink-3);
+  font-weight:700; margin:0 0 12px}
+
+/* ============================================================
+   CARDS / GRIDS
+   ============================================================ */
+.card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:24px}
+.card.tight{padding:18px}
+.grid{display:grid; gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(258px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.g3x{grid-template-columns:repeat(3,1fr)}
+@media (max-width:940px){ .g3x{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:620px){ .g3x{grid-template-columns:1fr} }
+.rowkey{display:flex; flex-wrap:wrap; gap:16px; margin-top:14px; font-size:12.2px;
+  color:var(--ink-3); font-family:var(--mono)}
+.rowkey span{display:inline-flex; align-items:center; gap:7px}
+.rowkey i{width:11px; height:5px; border-radius:100px; display:inline-block}
+
+.feat{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:24px; transition:border-color .18s, transform .18s}
+.feat:hover{border-color:#2a3a51; transform:translateY(-2px)}
+.feat .ico{width:38px; height:38px; border-radius:10px; display:grid; place-items:center;
+  background:rgba(52,229,200,.08); border:1px solid rgba(52,229,200,.2); margin-bottom:16px}
+.feat .ico svg{width:19px; height:19px; stroke:var(--teal); fill:none; stroke-width:1.9;
+  stroke-linecap:round; stroke-linejoin:round}
+.feat h3{font-size:1.02rem; margin-bottom:9px}
+.feat p{font-size:14.2px; color:var(--ink-2); line-height:1.6; margin:0}
+
+/* pills */
+.pills{display:flex; flex-wrap:wrap; gap:8px}
+.pill{font-family:var(--mono); font-size:12px; padding:5px 11px; border-radius:100px;
+  border:1px solid var(--line); background:var(--panel-2); color:var(--ink-2)}
+.pill.teal{border-color:rgba(52,229,200,.28); color:var(--teal); background:rgba(52,229,200,.06)}
+.pill.blue{border-color:rgba(110,168,254,.28); color:var(--blue); background:rgba(110,168,254,.06)}
+.pill.violet{border-color:rgba(167,139,250,.28); color:var(--violet); background:rgba(167,139,250,.06)}
+
+/* ============================================================
+   PIPELINE / ARCHITECTURE
+   ============================================================ */
+.pipe{position:relative; padding-left:0}
+.stage{display:grid; grid-template-columns:64px 1fr; gap:0; position:relative}
+.stage-rail{position:relative; display:flex; flex-direction:column; align-items:center}
+.stage-rail .node{width:38px; height:38px; border-radius:11px; flex:none; display:grid;
+  place-items:center; font-family:var(--mono); font-weight:700; font-size:13px;
+  background:var(--panel-2); border:1px solid var(--line); color:var(--teal); margin-top:20px; z-index:1}
+.stage-rail .lineseg{flex:1; width:2px; background:linear-gradient(var(--line), var(--line-soft))}
+.stage:last-child .stage-rail .lineseg{background:transparent}
+.stage-body{padding:14px 0 26px 20px; min-width:0}
+.stage-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px}
+.stage-card:hover{border-color:#2a3a51}
+.stage-title{display:flex; flex-wrap:wrap; align-items:baseline; gap:12px; margin-bottom:8px}
+.stage-title h3{font-size:1.06rem}
+.stage-title code{font-family:var(--mono); font-size:12.5px; color:var(--teal);
+  background:rgba(52,229,200,.07); border:1px solid rgba(52,229,200,.18);
+  padding:2px 8px; border-radius:6px}
+.stage-card p{font-size:14.2px; color:var(--ink-2); margin:0 0 14px}
+.artefacts{display:flex; flex-wrap:wrap; gap:7px}
+.artefact{font-family:var(--mono); font-size:11.5px; color:var(--ink-3);
+  border:1px dashed var(--line); padding:4px 9px; border-radius:6px; background:var(--bg-2)}
+@media (max-width:640px){ .stage{grid-template-columns:44px 1fr} .stage-body{padding-left:14px} }
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.tbl-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius);
+  background:var(--panel); -webkit-overflow-scrolling:touch}
+table{width:100%; border-collapse:collapse; font-size:13.8px; min-width:600px}
+thead th{
+  text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:700; padding:14px 16px; background:var(--panel-2);
+  border-bottom:1px solid var(--line); white-space:nowrap; position:sticky; top:0;
+}
+tbody td{padding:13px 16px; border-bottom:1px solid var(--line-soft); color:var(--ink-2); vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(255,255,255,.018)}
+td.num,th.num{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+td strong{color:var(--ink); font-weight:600}
+td .k{color:var(--ink); font-weight:600}
+.best{color:var(--teal) !important; font-weight:700}
+.neg{color:var(--rose)}
+.pos{color:var(--teal)}
+caption, .tbl-cap{caption-side:bottom; text-align:left; font-size:12.6px; color:var(--ink-3);
+  padding:12px 2px 0; line-height:1.5}
+
+/* ============================================================
+   CHART SHELL
+   ============================================================ */
+.chart-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:24px}
+.chart-head{display:flex; flex-wrap:wrap; gap:14px; align-items:flex-start;
+  justify-content:space-between; margin-bottom:22px}
+.chart-head h3{font-size:1.05rem; margin-bottom:5px}
+.chart-head p{font-size:13.2px; color:var(--ink-3); margin:0; max-width:560px}
+.seg{display:inline-flex; background:var(--bg-2); border:1px solid var(--line);
+  border-radius:9px; padding:3px; gap:2px; flex:none}
+.seg button{
+  font-family:var(--sans); font-size:12.6px; font-weight:600; color:var(--ink-3);
+  background:transparent; border:0; padding:6px 13px; border-radius:6px; cursor:pointer;
+  transition:.14s; white-space:nowrap;
+}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--panel-2); color:var(--teal);
+  box-shadow:inset 0 0 0 1px var(--line)}
+
+/* ---------- heatmap ---------- */
+.hm-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px}
+.hm{display:grid; gap:3px; min-width:720px}
+.hm .hcell{
+  font-family:var(--mono); font-size:12.2px; font-variant-numeric:tabular-nums;
+  display:grid; place-items:center; height:38px; border-radius:6px; color:#04120f;
+  font-weight:600; position:relative; cursor:default; transition:transform .12s, box-shadow .12s;
+}
+.hm .hcell:hover{transform:scale(1.06); z-index:3; box-shadow:0 0 0 2px var(--ink)}
+.hm .hcell.rowbest{box-shadow:inset 0 0 0 2px rgba(255,255,255,.85)}
+.hm .rlab{font-size:11.8px; color:var(--ink-2); display:flex; align-items:center;
+  justify-content:flex-end; padding-right:12px; height:38px; white-space:nowrap; font-weight:500}
+.hm .rlab .t{font-family:var(--mono); font-size:10.4px; color:var(--ink-3);
+  margin-left:7px; text-transform:uppercase; letter-spacing:.05em}
+.hm .clab{font-family:var(--mono); font-size:11px; color:var(--ink-3); text-align:center;
+  padding-bottom:8px; letter-spacing:.03em}
+.hm .corner{}
+.legend{display:flex; align-items:center; gap:10px; margin-top:18px; font-size:11.6px; color:var(--ink-3);
+  font-family:var(--mono)}
+.legend .ramp{height:9px; width:180px; border-radius:100px;
+  background:linear-gradient(90deg,#0d2b2b,#12564f,#1a8f7d,#2ac4a5,#7df3dc)}
+
+/* ---------- bar charts ---------- */
+.bars{display:flex; flex-direction:column; gap:11px}
+.bar-row{display:grid; grid-template-columns:146px 1fr 58px; align-items:center; gap:14px}
+.bar-row .name{font-size:13.2px; color:var(--ink-2); text-align:right; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis}
+.bar-row .name b{color:var(--ink); font-weight:600}
+.bar-track{height:26px; background:var(--bg-2); border-radius:6px; overflow:hidden;
+  border:1px solid var(--line-soft); position:relative}
+.bar-fill{height:100%; border-radius:5px; background:linear-gradient(90deg,var(--teal-dim),var(--teal));
+  transition:width .55s cubic-bezier(.22,1,.36,1); position:relative}
+.bar-fill.alt{background:linear-gradient(90deg,#3b6fbd,var(--blue))}
+.bar-fill.hi{background:linear-gradient(90deg,#b0553f,var(--rose))}
+.bar-row .val{font-family:var(--mono); font-size:13px; color:var(--ink);
+  font-variant-numeric:tabular-nums; text-align:right}
+.bar-row .val small{color:var(--ink-3); font-size:11px; display:block; line-height:1.2}
+@media (max-width:600px){ .bar-row{grid-template-columns:98px 1fr 52px; gap:9px}
+  .bar-row .name{font-size:12px} }
+
+/* grouped bars */
+.gbars{display:grid; grid-template-columns:repeat(var(--cols,6), minmax(74px,1fr)); gap:14px;
+  align-items:end; overflow-x:auto; padding-bottom:6px; -webkit-overflow-scrolling:touch}
+.gcol{display:flex; flex-direction:column; align-items:center; gap:10px}
+.gcol .pair{display:flex; align-items:flex-end; gap:7px; height:190px; width:100%; justify-content:center}
+.gcol .gb{width:34px; border-radius:5px 5px 0 0; position:relative;
+  transition:height .55s cubic-bezier(.22,1,.36,1); min-height:3px}
+.gcol .gb .tag{position:absolute; top:-21px; left:50%; transform:translateX(-50%);
+  font-family:var(--mono); font-size:10.8px; color:var(--ink-2); white-space:nowrap}
+.gb.a{background:linear-gradient(180deg,var(--teal),var(--teal-dim))}
+.gb.b{background:linear-gradient(180deg,var(--amber),#b8801f)}
+.gb.c{background:linear-gradient(180deg,var(--blue),#3b6fbd)}
+.gb.d{background:linear-gradient(180deg,var(--rose),#a9384f)}
+.gcol .glab{font-size:11.6px; color:var(--ink-3); text-align:center; line-height:1.35;
+  border-top:1px solid var(--line-soft); padding-top:9px; width:100%}
+.key{display:flex; flex-wrap:wrap; gap:16px; margin-top:20px; font-size:12.4px; color:var(--ink-2)}
+.key span{display:inline-flex; align-items:center; gap:7px}
+.key i{width:11px; height:11px; border-radius:3px; display:inline-block}
+
+/* scatter */
+.scatter-wrap{overflow-x:auto}
+.scatter{min-width:640px; display:block}
+.scatter .axis{stroke:var(--line); stroke-width:1}
+.scatter .grid-l{stroke:var(--line-soft); stroke-width:1; stroke-dasharray:3 4}
+.scatter text{font-family:var(--mono); font-size:10.5px; fill:var(--ink-3)}
+.scatter .pt-label{font-size:11px; font-weight:700; fill:#04120f; font-family:var(--sans)}
+.scatter .ax-title{fill:var(--ink-3); font-size:11px; font-family:var(--sans)}
+
+/* ---------- tooltip ---------- */
+#tip{
+  position:fixed; z-index:300; pointer-events:none; opacity:0; transform:translateY(4px);
+  transition:opacity .12s, transform .12s;
+  background:#050810; border:1px solid var(--line); border-radius:9px; padding:9px 12px;
+  font-size:12.4px; color:var(--ink); box-shadow:var(--shadow); max-width:250px; line-height:1.5;
+}
+#tip.on{opacity:1; transform:translateY(0)}
+#tip .tt{font-family:var(--mono); font-size:11px; color:var(--ink-3); display:block;
+  text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px}
+#tip b{color:var(--teal); font-family:var(--mono)}
+
+/* ============================================================
+   CODE
+   ============================================================ */
+.tabs{display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:0; overflow-x:auto;
+  scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{
+  font-family:var(--mono); font-size:12.4px; color:var(--ink-3); background:transparent;
+  border:0; border-bottom:2px solid transparent; padding:11px 15px; cursor:pointer;
+  white-space:nowrap; transition:.15s; margin-bottom:-1px;
+}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--teal); border-bottom-color:var(--teal)}
+pre{
+  margin:0; background:#05080f; border:1px solid var(--line); border-top:0;
+  border-radius:0 0 var(--radius) var(--radius); padding:20px; overflow-x:auto;
+  font-family:var(--mono); font-size:12.7px; line-height:1.72; color:#c9d6e6;
+  -webkit-overflow-scrolling:touch;
+}
+pre code{font-family:inherit}
+.cm{color:#5c7086; font-style:italic}
+.kw{color:#c792ea}
+.st{color:#9ae6a0}
+.fn{color:#82aaff}
+.nu{color:#f6b73c}
+.op{color:#89ddff}
+.pr{color:var(--teal)}
+code.inl{font-family:var(--mono); font-size:.9em; background:var(--panel-2);
+  border:1px solid var(--line); padding:1.5px 6px; border-radius:5px; color:var(--ink-2)}
+
+/* ============================================================
+   MISC BLOCKS
+   ============================================================ */
+.note{border-left:3px solid var(--teal); background:rgba(52,229,200,.045);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0; padding:16px 20px; font-size:14.2px;
+  color:var(--ink-2)}
+.note.warn{border-left-color:var(--amber); background:rgba(246,183,60,.05)}
+.note strong{color:var(--ink)}
+
+.kvs{display:grid; gap:0}
+.kv{display:grid; grid-template-columns:minmax(120px,190px) 1fr; gap:16px;
+  padding:11px 0; border-bottom:1px solid var(--line-soft); font-size:14px}
+.kv:last-child{border-bottom:0}
+.kv dt{color:var(--ink-3); font-size:12.6px; font-family:var(--mono)}
+.kv dd{margin:0; color:var(--ink-2)}
+@media (max-width:520px){ .kv{grid-template-columns:1fr; gap:2px} }
+
+ul.ticks{list-style:none; padding:0; margin:0; display:grid; gap:11px}
+ul.ticks li{position:relative; padding-left:27px; font-size:14.2px; color:var(--ink-2); line-height:1.6}
+ul.ticks li::before{
+  content:""; position:absolute; left:0; top:7px; width:15px; height:15px; border-radius:4px;
+  background:rgba(52,229,200,.09); border:1px solid rgba(52,229,200,.3);
+}
+ul.ticks li::after{
+  content:""; position:absolute; left:4.5px; top:10.5px; width:5px; height:8px;
+  border:solid var(--teal); border-width:0 1.8px 1.8px 0; transform:rotate(42deg);
+}
+ul.ticks li strong{color:var(--ink); font-weight:600}
+
+ul.plain{list-style:none; padding:0; margin:0; display:grid; gap:9px}
+ul.plain li{font-size:14px; color:var(--ink-2); padding-left:18px; position:relative}
+ul.plain li::before{content:"▸"; position:absolute; left:0; color:var(--teal); font-size:11px; top:2px}
+
+/* RQ accordion */
+.rq{border:1px solid var(--line); border-radius:var(--radius); background:var(--panel);
+  overflow:hidden; margin-bottom:10px}
+.rq summary{cursor:pointer; padding:17px 20px; font-weight:600; font-size:14.8px;
+  list-style:none; display:flex; align-items:flex-start; gap:13px; transition:background .15s}
+.rq summary::-webkit-details-marker{display:none}
+.rq summary:hover{background:var(--panel-2)}
+.rq summary .tagn{font-family:var(--mono); font-size:11.5px; color:var(--teal);
+  background:rgba(52,229,200,.08); border:1px solid rgba(52,229,200,.22);
+  padding:3px 8px; border-radius:6px; flex:none; margin-top:1px}
+.rq summary .chev{margin-left:auto; color:var(--ink-3); transition:transform .2s; flex:none; font-size:12px}
+.rq[open] summary .chev{transform:rotate(180deg)}
+.rq .rq-body{padding:0 20px 20px 60px; font-size:14.2px; color:var(--ink-2); line-height:1.68}
+@media (max-width:560px){ .rq .rq-body{padding-left:20px} }
+
+/* model cards */
+.mcard{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:19px; display:flex; flex-direction:column; gap:11px; transition:.18s}
+.mcard:hover{border-color:#2a3a51; transform:translateY(-2px)}
+.mcard .top{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.mcard h4{font-size:14.6px; margin:0; letter-spacing:-.015em}
+.mcard .score{font-family:var(--mono); font-size:14.5px; color:var(--teal); font-weight:700}
+.mcard p{font-size:13.1px; color:var(--ink-2); margin:0; line-height:1.55; flex:1}
+.mcard .cfg{font-family:var(--mono); font-size:11.3px; color:var(--ink-3);
+  border-top:1px solid var(--line-soft); padding-top:11px; line-height:1.5}
+.mcard .meter{height:4px; background:var(--bg-2); border-radius:100px; overflow:hidden}
+.mcard .meter i{display:block; height:100%; background:linear-gradient(90deg,var(--teal-dim),var(--teal));
+  border-radius:100px; transition:width .6s cubic-bezier(.22,1,.36,1)}
+.mcard.ens{border-color:rgba(167,139,250,.28)}
+.mcard.ens .score{color:var(--violet)}
+.mcard.ens .meter i{background:linear-gradient(90deg,#6d4fbb,var(--violet))}
+.mcard.scr{border-color:rgba(246,183,60,.3)}
+.mcard.scr .score{color:var(--amber)}
+.mcard.scr .meter i{background:linear-gradient(90deg,#a8761f,var(--amber))}
+
+/* dataset cards */
+.ds{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:20px;
+  display:flex; flex-direction:column; gap:12px}
+.ds .dt{display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.ds h4{font-size:15px; margin:0}
+.ds .src{font-family:var(--mono); font-size:10.8px; color:var(--ink-3);
+  text-transform:uppercase; letter-spacing:.07em}
+.ds p{font-size:13.2px; color:var(--ink-2); margin:0; line-height:1.55}
+.ds .rowbar{display:flex; height:7px; border-radius:100px; overflow:hidden; background:var(--bg-2)}
+.ds .rowbar i{display:block; height:100%}
+.ds .rowbar .tr{background:var(--teal)}
+.ds .rowbar .va{background:var(--blue)}
+.ds .rowbar .te{background:var(--violet)}
+.ds .nums{display:flex; flex-wrap:wrap; gap:14px; font-family:var(--mono); font-size:11.4px; color:var(--ink-3)}
+.ds .nums b{color:var(--ink-2); font-weight:500}
+
+/* footer */
+footer{padding:56px 0 64px; background:var(--bg)}
+.foot{display:flex; flex-wrap:wrap; gap:26px; justify-content:space-between; align-items:flex-start}
+.foot .fl{max-width:460px}
+.foot h4{font-size:15px; margin:0 0 9px}
+.foot p{font-size:13.4px; color:var(--ink-3); line-height:1.6}
+.foot-links{display:flex; flex-wrap:wrap; gap:9px}
+.foot-rule{height:1px; background:var(--line-soft); margin:34px 0 22px}
+.foot-bot{display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between;
+  font-size:12.4px; color:var(--ink-3); font-family:var(--mono)}
+
+/* reveal on scroll */
+.rv{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1)}
+.rv.in{opacity:1; transform:none}
+@media (prefers-reduced-motion: reduce){ .rv{opacity:1; transform:none} }
+</style>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16 4l9 3.2v8.3c0 5.9-3.7 10.4-9 12.9-5.3-2.5-9-7-9-12.9V7.2z" fill="none" stroke="#34e5c8" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M11.5 16.4l3.2 3.2 6.3-6.8" fill="none" stroke="#34e5c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      GUARDIAN-NIDS
+      <span class="b-sub">Cyber Analytics</span>
+    </a>
+    <div class="nav-links" id="navlinks">
+      <a href="#overview">Overview</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#benchmarks">Benchmarks</a>
+      <a href="#method">Method</a>
+      <a href="#models">Models</a>
+      <a href="#results">Results</a>
+      <a href="#scratch">From&#8209;Scratch RF</a>
+      <a href="#robustness">Robustness</a>
+      <a href="#engineering">Engineering</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ══════════════════════════ HERO ══════════════════════════ -->
+<header class="hero" id="top">
+  <div class="hero-grid-bg" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>Network Intrusion Detection · Cyber Analytics</span>
+
+    <h1 class="title"><span class="g">GUARDIAN&#8209;NIDS</span></h1>
+
+    <p class="title-sub">
+      A <strong>G</strong>eneralised, <strong>U</strong>nified <strong>A</strong>nalytics framework for
+      <strong>R</strong>eproducible <strong>D</strong>etection of <strong>I</strong>ntrusions <strong>A</strong>cross
+      <strong>N</strong>etworks — benchmarking classical, neural and ensemble models over six intrusion-detection
+      datasets, then re-implementing the selected algorithm from first principles in pure NumPy.
+    </p>
+
+    <p class="hero-note">
+      Built for MSSD&nbsp;51.506 <em>Security Tools Lab 1</em> (Project&nbsp;2 — Cyber Analytics),
+      M.Sc. Security by Design, Singapore University of Technology and Design.
+      Config-driven, leakage-safe, and reproducible from a single seed.
+    </p>
+
+    <div class="hero-cta">
+      <a class="btn primary" href="#results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+        Explore the results
+      </a>
+      <a class="btn" href="#architecture">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        How it works
+      </a>
+      <a class="btn" href="https://github.com/alvin21mfmlai/GUARDIAN-NIDS" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 00-3.79 23.4c.6.11.82-.26.82-.58v-2.2c-3.34.72-4.04-1.6-4.04-1.6-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.34-5.47-5.96 0-1.32.47-2.39 1.24-3.23-.12-.31-.54-1.53.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 016 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.65.24 2.87.12 3.18.77.84 1.24 1.91 1.24 3.23 0 4.63-2.8 5.65-5.48 5.95.43.37.82 1.1.82 2.22v3.29c0 .32.21.7.82.58A12 12 0 0012 .5z"/></svg>
+        Repository
+      </a>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="v"><em>6</em></div><div class="l">Benchmark datasets</div></div>
+      <div class="stat"><div class="v"><em>10</em></div><div class="l">Evaluated strategies</div></div>
+      <div class="stat"><div class="v">348</div><div class="l">Split-level records</div></div>
+      <div class="stat"><div class="v">16.3<span class="dim" style="font-size:.62em">M</span></div><div class="l">Rows across partitions</div></div>
+      <div class="stat"><div class="v">0.824</div><div class="l">Best mean macro-F1</div></div>
+      <div class="stat"><div class="v">98.4<span class="dim" style="font-size:.62em">%</span></div><div class="l">Scratch RF retention</div></div>
+    </div>
+  </div>
+</header>
+<!-- ══════════════════════════ OVERVIEW ══════════════════════════ -->
+<section id="overview">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-num">01 — Overview</span>
+      <h2 class="sec-title">One pipeline, six benchmarks, one honest comparison</h2>
+      <p class="sec-lede">
+        Supervised NIDS evaluation is easy to get wrong. Benchmarks differ in traffic era, feature
+        construction, label taxonomy and class balance, and a classifier can score well for the wrong
+        reason — memorising a lab identifier, exploiting duplicated rows, or simply predicting the
+        dominant class. GUARDIAN-NIDS is the apparatus built to remove those confounds: every dataset
+        flows through the same four-stage, YAML-driven pipeline, every model sees an identical frozen
+        feature matrix, and every number traces back to a single tidy evidence file.
+      </p>
+    </div>
+
+    <div class="grid g3x rv">
+      <article class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3l7.5 2.7v6.2c0 4.6-3 8.1-7.5 10-4.5-1.9-7.5-5.4-7.5-10V5.7z"/><path d="M9 12.3l2.2 2.2 4.3-4.7"/></svg></div>
+        <h3>Leakage-safe by construction</h3>
+        <p>IP addresses, ports, flow IDs and timestamps are dropped at load. Raw label columns never
+        survive as features. Every fitted statistic — medians, scalers, one-hot vocabularies, MI
+        rankings, class weights — comes from the training partition only and is frozen into a
+        human-readable <code class="inl">schema.json</code>.</p>
+      </article>
+
+      <article class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12.5 15V7"/><path d="M17 15v-6"/></svg></div>
+        <h3>Balanced metrics, not headline accuracy</h3>
+        <p>Macro-F1 is the primary metric, computed in pure NumPy and cross-checked against
+        scikit-learn to 1e-9. Accuracy, weighted-F1, ROC-AUC, PR-AUC, per-class recall and confusion
+        matrices sit alongside it — because a detector that is 93.4% accurate can still score
+        0.256 macro-F1.</p>
+      </article>
+
+      <article class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg></div>
+        <h3>Config-driven, not code-driven</h3>
+        <p>Adding a dataset or a model means editing a YAML file, not the pipeline. Dataset-specific
+        quirks — embedded header rows, Infinity cells, label-spelling drift, encoding faults — are
+        declared in <code class="inl">datasets.yaml</code> and isolated behind adapters.</p>
+      </article>
+
+      <article class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 2v6"/><path d="M12 16v6"/><circle cx="12" cy="12" r="3.4"/><path d="M4.9 4.9l3.2 3.2"/><path d="M15.9 15.9l3.2 3.2"/><path d="M2 12h6"/><path d="M16 12h6"/><path d="M4.9 19.1l3.2-3.2"/><path d="M15.9 8.1l3.2-3.2"/></svg></div>
+        <h3>From-scratch deployment path</h3>
+        <p>The winning standalone algorithm — Random Forest — is re-implemented with NumPy alone:
+        CART/Gini trees, bootstrap sampling, per-node <span class="nowrap">√p</span> feature
+        subsampling, balanced-subsample weighting and soft-vote aggregation, persisted as
+        <code class="inl">.npz</code> arrays plus JSON. No pickle, no ML library on the prediction path.</p>
+      </article>
+
+      <article class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1015.5-6.2"/><path d="M18.5 2v4h-4"/><path d="M12 7v5l3.4 2"/></svg></div>
+        <h3>Reproducible end to end</h3>
+        <p>A single seed (42) governs splits, sampling, tuning, initialisation and ensemble
+        construction. Every results row records its seed, sample caps, solver substitutions and
+        parameter provenance, and a deterministic report generator validates the evidence file
+        before any table or figure is drawn.</p>
+      </article>
+
+      <article class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8"/></svg></div>
+        <h3>Tested on synthetic fixtures</h3>
+        <p>Around 30 tests cover the cleaning quirks each dataset exhibits, split stratification,
+        schema JSON round-trips, no-leakage guarantees, unseen-category handling, metric equivalence,
+        ensembles and per-model caps — all without needing a single byte of real benchmark data.</p>
+      </article>
+    </div>
+
+    <div class="note rv" style="margin-top:26px">
+      <strong>Two winners, two questions.</strong> The <strong>Stacked-LR ensemble</strong> is the strongest
+      aggregate predictive system (mean test macro-F1 <span class="mono">0.824</span>), but it is a composite of
+      seven base estimators plus a meta-learner. The <strong>library Random Forest</strong> is the strongest
+      single deployable algorithm (<span class="mono">0.818</span> test, <span class="mono">0.867</span> validation,
+      winning 11 of 12 validation cases) — and is therefore the algorithm re-implemented from scratch.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ ARCHITECTURE ══════════════════════════ -->
+<section id="architecture" class="alt">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-num">02 — Architecture</span>
+      <h2 class="sec-title">Four stages, each independently testable</h2>
+      <p class="sec-lede">
+        Each stage has its own CLI, its own artefacts and its own tests. Stage 4 reuses the Stage 2
+        preprocessing contract but trains, stores and executes the selected Random Forest without any
+        ML estimator library — so the deployment path is provably independent of scikit-learn.
+      </p>
+    </div>
+
+    <div class="pipe rv">
+
+      <div class="stage">
+        <div class="stage-rail"><div class="node">1</div><div class="lineseg"></div></div>
+        <div class="stage-body">
+          <div class="stage-card">
+            <div class="stage-title"><h3>Ingest &amp; cleanse</h3><code>run_pipeline.py</code></div>
+            <p>Reads published engineered CSV/Parquet tables — never packet captures — in 250,000-row
+            chunks. Normalises column names, strips embedded repeated header rows, coerces numerics
+            when ≥95% of non-missing values parse, replaces ±Infinity with missing, normalises label
+            spellings per source, and validates required columns and label domains. Unknown labels
+            raise rather than being silently mapped to benign. Duplicates are <em>reported</em> here,
+            never removed globally.</p>
+            <div class="artefacts">
+              <span class="artefact">interim/&lt;ds&gt;/&lt;split&gt;.parquet</span>
+              <span class="artefact">reports/&lt;ds&gt;/data_quality.json</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-rail"><div class="node">2</div><div class="lineseg"></div></div>
+        <div class="stage-body">
+          <div class="stage-card">
+            <div class="stage-title"><h3>Freeze the preprocessing contract</h3><code>run_preprocess.py</code></div>
+            <p>Establishes partitions (official splits preserved; 15% validation carved from train;
+            otherwise a seeded stratified 70/15/15), removes exact duplicates from <em>training only</em>,
+            then fits median imputation, near-constant and correlation pruning, standardisation and
+            one-hot encoding on the training rows alone. Rare categories and unseen test categories both
+            land in a shared <code class="inl">__OTHER__</code> bucket so the feature dimension can never
+            shift at inference. Mutual-information rankings and balanced class weights are computed and
+            frozen alongside.</p>
+            <div class="artefacts">
+              <span class="artefact">processed/&lt;ds&gt;/schema.json</span>
+              <span class="artefact">processed/&lt;ds&gt;/splits.npz</span>
+              <span class="artefact">reports/&lt;ds&gt;/preprocess_report.json</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-rail"><div class="node">3</div><div class="lineseg"></div></div>
+        <div class="stage-body">
+          <div class="stage-card">
+            <div class="stage-title"><h3>Train &amp; evaluate the candidate suite</h3><code>run_models.py</code></div>
+            <p>Seven base learners and two score-level ensembles are fitted on the identical frozen
+            matrix, for both the binary and the native multi-class task. Large-scale solver
+            substitutions (SGD hinge / SGD log-loss above 500k training rows) and per-model caps
+            (FT-Transformer at 500k stratified rows) are declared in config and recorded in the result
+            metadata. One tidy row is appended per evaluated split.</p>
+            <div class="artefacts">
+              <span class="artefact">results/results.csv</span>
+              <span class="artefact">reports/&lt;ds&gt;/models_&lt;task&gt;.json</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-rail"><div class="node">4</div><div class="lineseg"></div></div>
+        <div class="stage-body">
+          <div class="stage-card">
+            <div class="stage-title"><h3>Library-free training &amp; deployment</h3><code>run_deploy.py</code></div>
+            <p>Trains <code class="inl">RandomForestScratch</code> on the same frozen matrix and packages
+            it with the Stage&nbsp;2 schema into a self-contained bundle. A newly supplied raw benchmark
+            file can be cleaned by the same adapter, transformed by the same frozen schema and classified
+            with nothing but NumPy and pandas on the path — which is what prevents training/serving skew.
+            A <code class="inl">compare</code> subcommand benchmarks it against scikit-learn under aligned
+            hyperparameters.</p>
+            <div class="artefacts">
+              <span class="artefact">deploy/&lt;ds&gt;_&lt;task&gt;/schema.json</span>
+              <span class="artefact">model.npz + model.json</span>
+              <span class="artefact">bundle.json</span>
+              <span class="artefact">predictions_*.csv</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="note rv" style="margin-top:26px">
+      <strong>Why the sequence matters.</strong> The scratch target is chosen from <em>validation</em>
+      macro-F1 across the seven standalone algorithms — before the untouched standard-test partitions are
+      read. Algorithm selection is therefore independent of both the final test outcome and the
+      deployment implementation.
+    </div>
+  </div>
+</section>
+<!-- ══════════════════════════ BENCHMARKS ══════════════════════════ -->
+<section id="benchmarks">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-num">03 — Benchmarks</span>
+      <h2 class="sec-title">Six datasets, deliberately not interchangeable</h2>
+      <p class="sec-lede">
+        One historical baseline, two modern enterprise corpora, and three standardised NetFlow-v2
+        derivatives. The portfolio spans traffic era, attack taxonomy, feature construction, scale and
+        class imbalance. Original and derivative representations are never pooled into a shared split —
+        agreement between them indicates robustness to feature engineering, not cross-network
+        generalisation.
+      </p>
+    </div>
+
+    <div class="grid g3x rv" id="dsCards"></div>
+    <div class="rowkey rv"><span><i style="background:var(--teal)"></i> train</span>
+      <span><i style="background:var(--blue)"></i> validation</span>
+      <span><i style="background:var(--violet)"></i> test</span>
+      <span class="dim">— partition proportions, not absolute scale</span></div>
+
+    <div class="tbl-wrap rv" style="margin-top:26px">
+      <table>
+        <caption class="tbl-cap">Actual row counts and encoded feature dimensions recorded by the final experiment. Training counts are the rows supplied to the model runner before any per-model cap; only the FT-Transformer is separately capped at 500,000 rows on the larger benchmarks.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Benchmark</th>
+            <th scope="col" class="num">Train</th>
+            <th scope="col" class="num">Validation</th>
+            <th scope="col" class="num">Test</th>
+            <th scope="col" class="num">Features</th>
+            <th scope="col">Split &amp; processing note</th>
+          </tr>
+        </thead>
+        <tbody id="dsRows"></tbody>
+      </table>
+    </div>
+
+    <div class="grid g2 rv" style="margin-top:26px">
+      <div class="card">
+        <h4 class="mini">Classification scope</h4>
+        <ul class="plain">
+          <li><strong style="color:var(--ink)">Binary.</strong> Every recognised attack label maps to 1, benign to 0. Unknown, unlabelled or malformed values raise a validation error rather than defaulting to benign.</li>
+          <li><strong style="color:var(--ink)">Native multi-class.</strong> Each benchmark keeps its own security taxonomy — NSL-KDD collapsed to its five macro-classes, UNSW-NB15 as Normal plus nine attack categories, CIC and NF-v2 members on their normalised source labels.</li>
+          <li>No universal label map is imposed. A CIC web attack and a UNSW exploit may be related, but treating them as identical without a documented ontology would amount to subjective re-labelling.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 class="mini">Where the data comes from</h4>
+        <dl class="kvs">
+          <div class="kv"><dt>NSL-KDD</dt><dd>UNB / Canadian Institute for Cybersecurity</dd></div>
+          <div class="kv"><dt>UNSW-NB15</dt><dd>UNSW Canberra Cyber Range</dd></div>
+          <div class="kv"><dt>CIC-IDS2017</dt><dd>Canadian Institute for Cybersecurity</dd></div>
+          <div class="kv"><dt>NF-v2 family</dt><dd>University of Queensland — Sarhan et&nbsp;al., <em>Towards a Standard Feature Set for NIDS Datasets</em> (2022)</dd></div>
+          <div class="kv"><dt>FT-Transformer</dt><dd>Gorishniy et&nbsp;al., <em>Revisiting Deep Learning Models for Tabular Data</em>, NeurIPS 2021</dd></div>
+        </dl>
+        <p class="dim" style="font-size:12.6px; margin-top:14px">Datasets are not redistributed with the
+        repository. Paths are declared in <code class="inl">config/datasets.yaml</code> and resolved
+        relative to a <code class="inl">Data/</code> folder or an explicit <code class="inl">--data-root</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ METHOD ══════════════════════════ -->
+<section id="method" class="alt">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-num">04 — Method</span>
+      <h2 class="sec-title">The controls that make the comparison mean something</h2>
+      <p class="sec-lede">
+        The final benchmark is a <em>fixed-configuration comparison</em>: reference hyperparameters are
+        declared in config before any test evaluation, so the numbers describe one controlled model suite
+        rather than the maximum attainable score of every algorithm on every dataset.
+      </p>
+    </div>
+
+    <div class="grid g2 rv">
+      <div class="card">
+        <h3 class="sub">Leakage controls</h3>
+        <ul class="ticks">
+          <li>Source and destination IP addresses, flow identifiers and exact timestamps are excluded before feature transformation; NF-v2 address and port fields are excluded consistently.</li>
+          <li>Raw label-source columns (<code class="inl">label</code>, <code class="inl">attack_cat</code>, <code class="inl">type</code>, <code class="inl">difficulty</code>) are dropped at load, with a config-level safety net behind them.</li>
+          <li>All fitted statistics — medians, category vocabularies, scale parameters, correlation and near-constant decisions, MI scores, class weights, label encoders — derive from <strong>D<sub>tr</sub></strong> only.</li>
+          <li>Validation, test and KDDTest-21 are transformed by the frozen training schema, so the evaluation distribution can never influence the representation.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 class="sub">Partitioning &amp; imbalance</h3>
+        <ul class="ticks">
+          <li>Official train/test boundaries are preserved where they exist; 15% validation is carved from the training partition.</li>
+          <li>Split-less datasets receive a seeded stratified 70/15/15 partition, stratified on the <em>multi-class</em> target so rare attack categories survive in every partition.</li>
+          <li>Exact duplicates are removed from training only — global de-duplication would change the natural validation and test distributions.</li>
+          <li>Balanced class weights are computed from the training target and used by Logistic Regression, Decision Tree, Random Forest, Linear SVM and the FT-Transformer. No synthetic over-sampling is introduced.</li>
+          <li>Test partitions are never touched during tuning or ensemble meta-training.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid g2 rv" style="margin-top:16px">
+      <div class="card">
+        <h3 class="sub">Feature pipeline</h3>
+        <dl class="kvs">
+          <div class="kv"><dt>Imputation</dt><dd>Training median for numeric columns</dd></div>
+          <div class="kv"><dt>Near-constant filter</dt><dd>Dropped when one value occupies ≥ 99.9% of training rows</dd></div>
+          <div class="kv"><dt>Correlation prune</dt><dd>|Pearson r| ≥ 0.98 — the later member of the pair is removed</dd></div>
+          <div class="kv"><dt>Scaling</dt><dd>z = (x − μ<sup>tr</sup>) ⁄ σ<sup>tr</sup>, training statistics only</dd></div>
+          <div class="kv"><dt>Categoricals</dt><dd>One-hot; categories below 0.1% of training rows grouped into <code class="inl">__OTHER__</code>, max 60 categories per field</dd></div>
+          <div class="kv"><dt>Ranking</dt><dd>Mutual information against the training target, sample-capped at 300,000 rows with quantile-binned continuous values</dd></div>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h3 class="sub">Evaluation metrics</h3>
+        <p class="muted" style="font-size:14px">Every metric is implemented in pure NumPy from one-vs-rest
+        counts and cross-checked against scikit-learn to at least 1e-9 in the test suite.</p>
+        <div class="pills" style="margin-top:16px">
+          <span class="pill teal">macro-F1 · primary</span>
+          <span class="pill">accuracy</span>
+          <span class="pill">macro P / R</span>
+          <span class="pill">weighted-F1</span>
+          <span class="pill">per-class P / R / F1</span>
+          <span class="pill blue">ROC-AUC</span>
+          <span class="pill blue">PR-AUC (binary)</span>
+          <span class="pill blue">OvR macro AUC</span>
+          <span class="pill violet">confusion matrices</span>
+          <span class="pill violet">fit / predict wall-clock</span>
+          <span class="pill violet">serialised model size</span>
+        </div>
+        <div class="note" style="margin-top:18px; font-size:13.6px">
+          Macro-F1 leads because it weights every class equally — the property that matters when rare
+          attacks are the point. Aggregate scores give equal weight to each of the twelve dataset–task
+          cases rather than pooling test records into a size-dominated statistic.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ══════════════════════════ MODELS ══════════════════════════ -->
+<section id="models">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-num">05 — Model suite</span>
+      <h2 class="sec-title">Seven base learners, two ensembles, one scratch build</h2>
+      <p class="sec-lede">
+        The suite is deliberately heterogeneous: probabilistic and linear baselines, interpretable and
+        ensemble tree methods, a margin-based classifier, two tabular neural architectures, and two
+        score-level combiners. A method is informative even when it loses — its behaviour tells you
+        whether the benchmark is approximately linear, whether feature interactions matter, and what
+        computational price additional model complexity actually buys.
+      </p>
+    </div>
+
+    <h4 class="mini rv">Base learners · mean test macro-F1 across 12 dataset–task cases</h4>
+    <div class="grid g3 rv" id="modelCards" style="margin-bottom:26px"></div>
+
+    <h4 class="mini rv">Score-level ensembles &amp; the from-scratch implementation</h4>
+    <div class="grid g3 rv" id="ensCards"></div>
+
+    <div class="grid g2 rv" style="margin-top:26px">
+      <div class="card">
+        <h4 class="mini">Selection rule</h4>
+        <ul class="plain">
+          <li><strong style="color:var(--ink)">Step 1 — standalone scratch target.</strong> The seven single base algorithms are ranked by equal-weight mean <em>validation</em> macro-F1 across the twelve dataset–task cases. Ensembles are excluded: the stack's meta-learner is fitted on validation score vectors, so its recorded validation metric is in-sample for the stacking layer.</li>
+          <li><strong style="color:var(--ink)">Step 2 — final system comparison.</strong> With configurations fixed, standard-test macro-F1 is reported for all seven base algorithms and both ensembles — establishing the strongest predictive system without conflating a seven-estimator stack with one standalone algorithm.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 class="mini">Validation ranking that justified the scratch target</h4>
+        <div class="bars" id="valBars"></div>
+        <p class="dim" style="font-size:12.4px; margin-top:16px">Random Forest leads the standalone
+        validation comparison with mean macro-F1 0.867 and eleven wins out of twelve dataset–task cases
+        — the evidence basis for re-implementing it from scratch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ══════════════════════════ RESULTS ══════════════════════════ -->
+<section id="results" class="alt">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-num">06 — Results</span>
+      <h2 class="sec-title">No single strategy wins every case</h2>
+      <p class="sec-lede">
+        348 split-level records: 90 training, 120 validation, 120 standard-test and 18 NSL-KDD
+        KDDTest-21 observations. Every figure below is drawn from the same evidence file, and the
+        aggregate view gives each of the twelve dataset–task cases equal weight rather than letting
+        the multi-million-row benchmarks dominate.
+      </p>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="chart-card rv">
+      <div class="chart-head">
+        <div>
+          <h3>Aggregate leaderboard</h3>
+          <p>Equal-weight mean test macro-F1 across all twelve dataset–task cases. RF&#8209;S is the
+          from-scratch NumPy Random Forest, shown descriptively — it is produced only after the
+          standalone algorithm has been justified.</p>
+        </div>
+        <div class="seg" role="group" aria-label="Leaderboard metric">
+          <button type="button" data-lb="mean" aria-pressed="true">Overall</button>
+          <button type="button" data-lb="bin" aria-pressed="false">Binary</button>
+          <button type="button" data-lb="mul" aria-pressed="false">Multi-class</button>
+        </div>
+      </div>
+      <div class="bars" id="lbBars"></div>
+      <div class="key">
+        <span><i style="background:linear-gradient(90deg,var(--teal-dim),var(--teal))"></i> Library / ensemble strategy</span>
+        <span><i style="background:linear-gradient(90deg,#b0553f,var(--rose))"></i> From-scratch NumPy Random Forest</span>
+        <span class="dim">Trailing figure = dataset–task wins (out of 12)</span>
+      </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="chart-card rv" style="margin-top:18px">
+      <div class="chart-head">
+        <div>
+          <h3>Test macro-F1 across every dataset, task and strategy</h3>
+          <p>Twelve dataset–task rows by ten evaluated strategies. The white outline marks the best
+          value in each row; where several cells tie at three decimals the winner in the table below
+          is resolved at full precision. Hover any cell for the exact figure.</p>
+        </div>
+        <div class="seg" role="group" aria-label="Heatmap task filter">
+          <button type="button" data-hm="all" aria-pressed="true">All 12</button>
+          <button type="button" data-hm="binary" aria-pressed="false">Binary</button>
+          <button type="button" data-hm="multi" aria-pressed="false">Multi-class</button>
+        </div>
+      </div>
+      <div class="hm-scroll"><div class="hm" id="heat"></div></div>
+      <div class="legend">
+        <span>0.0</span><span class="ramp" aria-hidden="true"></span><span>1.0</span>
+        <span class="dim" style="margin-left:10px">macro-F1</span>
+      </div>
+    </div>
+
+    <!-- Best per case table -->
+    <div class="rv" style="margin-top:26px">
+      <h3 class="sub" style="margin-bottom:14px">Best strategy per dataset–task case</h3>
+      <div class="tbl-wrap">
+        <table>
+          <caption class="tbl-cap">Highest test macro-F1 among the nine candidate strategies for each benchmark and task, under the fixed-configuration comparison. Stacked-LR wins five comparisons, the library Random Forest four, soft voting two and MLP one.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Benchmark</th><th scope="col">Task</th><th scope="col">Best strategy</th>
+              <th scope="col" class="num">Accuracy</th><th scope="col" class="num">Macro-P</th>
+              <th scope="col" class="num">Macro-R</th><th scope="col" class="num">Macro-F1</th>
+            </tr>
+          </thead>
+          <tbody id="bestRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Binary vs multi -->
+    <div class="chart-card rv" style="margin-top:26px">
+      <div class="chart-head">
+        <div>
+          <h3>Binary detection versus native multi-class classification</h3>
+          <p>Best candidate test macro-F1 per benchmark. Separating benign from attack needs one
+          boundary; naming the attack family means separating overlapping traffic profiles with
+          badly unequal support.</p>
+        </div>
+      </div>
+      <div class="gbars" id="bvmChart"></div>
+      <div class="key">
+        <span><i style="background:linear-gradient(180deg,var(--teal),var(--teal-dim))"></i> Binary</span>
+        <span><i style="background:linear-gradient(180deg,var(--amber),#b8801f)"></i> Multi-class</span>
+      </div>
+      <div class="tbl-wrap" style="margin-top:22px">
+        <table>
+          <caption class="tbl-cap">Gaps are quoted from the report and computed at full precision, so they can differ in the last digit from the difference of the rounded values shown.</caption>
+            <thead><tr><th scope="col">Benchmark</th><th scope="col" class="num">Best binary</th><th scope="col" class="num">Best multi</th><th scope="col" class="num">Absolute gap</th><th scope="col" class="num">Relative reduction</th></tr></thead>
+          <tbody id="gapRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Accuracy inflation -->
+    <div class="grid g2 rv" style="margin-top:26px">
+      <div class="card">
+        <h3 class="sub">When accuracy overstates capability</h3>
+        <p class="muted" style="font-size:14.2px">The single largest methodological finding: on
+        multi-class UNSW and NF-v2 tasks, several models classify well over 90% of records correctly
+        while performing poorly once every class is weighted equally. Dominant benign or high-volume
+        attack classes carry the accuracy; rare-class failures stay visible only in macro-F1.</p>
+        <div class="tbl-wrap" style="margin-top:16px; border-radius:var(--radius-sm)">
+          <table style="min-width:440px">
+            <thead><tr><th scope="col">Case</th><th scope="col">Model</th><th scope="col" class="num">Acc.</th><th scope="col" class="num">Macro-F1</th><th scope="col" class="num">Gap</th></tr></thead>
+            <tbody id="gapInflate"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="sub">Ranking quality ≠ threshold quality</h3>
+        <p class="muted" style="font-size:14.2px">ROC-AUC summarises how well a model orders records
+        across all thresholds; macro-F1 reflects the decision actually taken at the implemented
+        operating point. They answer different questions, and NSL-KDD binary makes the split visible:</p>
+        <div class="kvs" style="margin-top:14px">
+          <div class="kv"><dt>Random Forest</dt><dd><span class="mono">ROC-AUC 0.968</span> · <span class="mono">macro-F1 0.759</span></dd></div>
+          <div class="kv"><dt>MLP</dt><dd><span class="mono">ROC-AUC 0.885</span> · <span class="mono">macro-F1 0.787</span></dd></div>
+        </div>
+        <div class="note" style="margin-top:16px; font-size:13.6px">
+          The forest ranks better; the MLP decides better at its default threshold. A deployment
+          decision needs both — plus an explicit statement of what a false negative costs relative to
+          a false positive.
+        </div>
+      </div>
+    </div>
+
+    <!-- Efficiency -->
+    <div class="chart-card rv" style="margin-top:26px">
+      <div class="chart-head">
+        <div>
+          <h3>Performance–efficiency trade-off</h3>
+          <p>Standalone models only — an operational ensemble must still retain and execute all of its
+          constituent estimators. Horizontal axis is logarithmic; bubble area encodes median serialised
+          model size.</p>
+        </div>
+      </div>
+      <div class="scatter-wrap"><svg class="scatter" id="effChart" viewBox="0 0 760 400" role="img"
+        aria-label="Scatter plot of mean test macro-F1 against median fit time per dataset-task case, on a logarithmic time axis"></svg></div>
+      <div class="tbl-wrap" style="margin-top:22px">
+        <table>
+          <caption class="tbl-cap">Standalone-model performance and resource summary across the twelve standard test cases. Times are wall-clock measurements on the experiment host and are comparable within this run, not against hardware-independent benchmarks.</caption>
+          <thead><tr>
+            <th scope="col">Model</th><th scope="col" class="num">Mean macro-F1</th>
+            <th scope="col" class="num">Median fit</th><th scope="col" class="num">Total fit</th>
+            <th scope="col" class="num">Median predict</th><th scope="col" class="num">Median size</th>
+            <th scope="col" class="num">Max size</th>
+          </tr></thead>
+          <tbody id="effRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ══════════════════════════ SCRATCH RF ══════════════════════════ -->
+<section id="scratch">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-num">07 — From-scratch Random Forest</span>
+      <h2 class="sec-title">The selected algorithm, rebuilt in NumPy alone</h2>
+      <p class="sec-lede">
+        <code class="inl">DecisionTreeScratch</code> and <code class="inl">RandomForestScratch</code> import
+        nothing but NumPy. No scikit-learn, SciPy, PyTorch, TensorFlow, Keras, XGBoost, LightGBM or Weka
+        wrapper appears anywhere on the training, prediction or persistence path — pandas and PyYAML are
+        used outside the estimator for file handling and for applying the frozen preprocessing contract.
+      </p>
+    </div>
+
+    <div class="grid g4 rv" style="margin-bottom:26px">
+      <div class="card tight">
+        <h4 class="mini">Mean macro-F1 retained</h4>
+        <div class="mono" style="font-size:1.9rem; font-weight:700; color:var(--teal); letter-spacing:-.03em">98.4%</div>
+        <p class="dim" style="font-size:12.6px; margin-top:6px">0.804 versus the library forest's 0.818</p>
+      </div>
+      <div class="card tight">
+        <h4 class="mini">Binary mean difference</h4>
+        <div class="mono" style="font-size:1.9rem; font-weight:700; color:var(--teal); letter-spacing:-.03em">−0.0008</div>
+        <p class="dim" style="font-size:12.6px; margin-top:6px">0.930 versus 0.931 — effectively coincident</p>
+      </div>
+      <div class="card tight">
+        <h4 class="mini">Median serialised size</h4>
+        <div class="mono" style="font-size:1.9rem; font-weight:700; color:var(--teal); letter-spacing:-.03em">4.40 <span style="font-size:.6em">MB</span></div>
+        <p class="dim" style="font-size:12.6px; margin-top:6px">Against 166.34 MB — but at 100 trees, not 200</p>
+      </div>
+      <div class="card tight">
+        <h4 class="mini">Median fit time</h4>
+        <div class="mono" style="font-size:1.9rem; font-weight:700; color:var(--amber); letter-spacing:-.03em">11.94 <span style="font-size:.6em">min</span></div>
+        <p class="dim" style="font-size:12.6px; margin-top:6px">≈10.5× the parallel library forest's 1.13 min</p>
+      </div>
+    </div>
+
+    <div class="chart-card rv">
+      <div class="chart-head">
+        <div>
+          <h3>Library forest versus scratch forest, case by case</h3>
+          <p>Test macro-F1 for all twelve dataset–task cases. Binary results are near-identical; the
+          divergence is concentrated in the harder multi-class problems.</p>
+        </div>
+        <div class="seg" role="group" aria-label="Random Forest comparison task filter">
+          <button type="button" data-rf="binary" aria-pressed="true">Binary</button>
+          <button type="button" data-rf="multi" aria-pressed="false">Multi-class</button>
+        </div>
+      </div>
+      <div class="gbars" id="rfChart"></div>
+      <div class="key">
+        <span><i style="background:linear-gradient(180deg,var(--blue),#3b6fbd)"></i> Library Random Forest — 200 parallel trees</span>
+        <span><i style="background:linear-gradient(180deg,var(--rose),#a9384f)"></i> Scratch Random Forest — 100 serial NumPy trees</span>
+      </div>
+      <div class="tbl-wrap" style="margin-top:22px">
+        <table>
+          <caption class="tbl-cap">Δ is scratch minus library, computed at full precision — it can differ in the last digit from the difference of the rounded values shown. Mean absolute case-level difference is 0.0138; the median is 0.0023 — most binary results and the NSL-KDD multi-class result are extremely close, and a small number of large multi-class cases account for most of the aggregate gap.</caption>
+          <thead><tr>
+            <th scope="col">Benchmark</th>
+            <th scope="col" class="num">Binary — library</th><th scope="col" class="num">Binary — scratch</th><th scope="col" class="num">Δ</th>
+            <th scope="col" class="num">Multi — library</th><th scope="col" class="num">Multi — scratch</th><th scope="col" class="num">Δ</th>
+          </tr></thead>
+          <tbody id="rfRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="note warn rv" style="margin-top:22px">
+      <strong>Read this as deployment retention, not estimator parity.</strong> The submitted
+      configurations are not identical — the scratch forest grows 100 serial NumPy trees while the
+      library forest grows 200 in parallel — and threshold enumeration, random-number streams and
+      tie-breaking differ. Algorithmic parity is isolated separately by
+      <code class="inl">run_deploy.py compare</code>, which trains both under aligned tree count, depth,
+      leaf size, feature subsampling, class weighting and seed. On NSL-KDD binary that comparison
+      reaches <strong>98.8% prediction agreement with macro-F1 within 0.003</strong>; the synthetic
+      parity test asserts &gt;90% agreement and an absolute macro-F1 difference below 0.03.
+    </div>
+
+    <div class="grid g2 rv" style="margin-top:26px">
+      <div class="card">
+        <h3 class="sub">What the implementation actually realises</h3>
+        <dl class="kvs">
+          <div class="kv"><dt>Trees</dt><dd>100, grown with an explicit stack rather than Python recursion</dd></div>
+          <div class="kv"><dt>Splitting</dt><dd>Weighted Gini; exhaustive midpoint search between consecutive distinct sorted values</dd></div>
+          <div class="kv"><dt>Candidate features</dt><dd><code class="inl">sqrt</code> — re-sampled without replacement at <em>every</em> node</dd></div>
+          <div class="kv"><dt>Bootstrap</dt><dd>One size-<em>n</em> sample drawn with replacement per tree</dd></div>
+          <div class="kv"><dt>Class weighting</dt><dd><code class="inl">balanced_subsample</code>, recomputed from each bootstrap's class frequencies</dd></div>
+          <div class="kv"><dt>Aggregation</dt><dd>Mean leaf-probability distribution across trees, then argmax — a soft vote, not a vote over hard labels</dd></div>
+          <div class="kv"><dt>Node storage</dt><dd>Flat parallel arrays: feature, threshold, left, right, leaf distribution</dd></div>
+          <div class="kv"><dt>Persistence</dt><dd>Compressed <code class="inl">model.npz</code> + JSON header — no pickle, deterministic reload</dd></div>
+          <div class="kv"><dt>Importance</dt><dd>Split-frequency proxy, explicitly <em>not</em> impurity-decrease importance</dd></div>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h3 class="sub">Why the trade-off runs both ways</h3>
+        <p class="muted" style="font-size:14.2px">Rebuilding the algorithm changes its engineering
+        profile more than its predictive behaviour. Serial NumPy training costs roughly 10.5× the median
+        fit time and 16.4× the median prediction time of a mature parallel implementation. In the
+        opposite direction, storing 100 trees as compressed arrays yields a median artefact about
+        2.65% the size of the library forest's — 4.40 MB against 166.34 MB, and 31.25 MB against
+        2.91 GB at the maximum.</p>
+        <p class="muted" style="font-size:14.2px">Those ratios reflect both implementation and
+        configuration, and should be read as observed deployment artefacts rather than a universal claim
+        that a from-scratch forest is inherently 97% smaller.</p>
+        <div class="bars" style="margin-top:18px" id="ratioBars"></div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:26px">
+      <h3 class="sub" style="margin-bottom:16px">Inside the code</h3>
+      <div class="tabs" role="tablist" id="codeTabs">
+        <button type="button" role="tab" aria-selected="true" data-code="split">random_forest_scratch.py · split search</button>
+        <button type="button" role="tab" aria-selected="false" data-code="forest">random_forest_scratch.py · forest &amp; weights</button>
+        <button type="button" role="tab" aria-selected="false" data-code="yaml">config/datasets.yaml · registry</button>
+        <button type="button" role="tab" aria-selected="false" data-code="cli">CLI · end-to-end</button>
+      </div>
+      <div id="codePanes"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ ROBUSTNESS ══════════════════════════ -->
+<section id="robustness" class="alt">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-num">08 — Robustness</span>
+      <h2 class="sec-title">A strong held-out score is not a robustness claim</h2>
+      <p class="sec-lede">
+        KDDTest-21 is the harder subset of the NSL-KDD test set, evaluated without retraining. Every
+        one of the nine candidate strategies loses macro-F1 when the evaluation moves from KDDTest+ to
+        KDDTest-21 — the ordering stays partly stable, the absolute performance does not.
+      </p>
+    </div>
+
+    <div class="chart-card rv">
+      <div class="chart-head">
+        <div>
+          <h3>NSL-KDD generalisation stress</h3>
+          <p>Macro-F1 on KDDTest+ against KDDTest-21, no retraining between the two.</p>
+        </div>
+        <div class="seg" role="group" aria-label="Stress test task filter">
+          <button type="button" data-st="binary" aria-pressed="true">Binary</button>
+          <button type="button" data-st="multi" aria-pressed="false">Multi-class</button>
+        </div>
+      </div>
+      <div class="gbars" id="stressChart"></div>
+      <div class="key">
+        <span><i style="background:linear-gradient(180deg,var(--teal),var(--teal-dim))"></i> KDDTest+</span>
+        <span><i style="background:linear-gradient(180deg,var(--rose),#a9384f)"></i> KDDTest-21</span>
+      </div>
+      <div class="tbl-wrap" style="margin-top:22px">
+        <table>
+          <thead><tr>
+            <th scope="col">Model</th>
+            <th scope="col" class="num">Binary Test+</th><th scope="col" class="num">Binary Test-21</th><th scope="col" class="num">Drop</th>
+            <th scope="col" class="num">Multi Test+</th><th scope="col" class="num">Multi Test-21</th><th scope="col" class="num">Drop</th>
+          </tr></thead>
+          <tbody id="stressRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid g2 rv" style="margin-top:26px">
+      <div class="card">
+        <h3 class="sub">Research questions, answered</h3>
+        <details class="rq" open>
+          <summary><span class="tagn">RQ1</span> Which candidate strategy performs best? <span class="chev">▾</span></summary>
+          <div class="rq-body">Stacked-LR has the highest equal-weight mean test macro-F1 at
+          <span class="mono">0.824</span> and wins five of twelve cases. The library Random Forest is the
+          strongest standalone base model at <span class="mono">0.818</span> with four wins. Stack when
+          maximum portfolio-level performance is the priority; Random Forest when one independently
+          deployable algorithm is required.</div>
+        </details>
+        <details class="rq">
+          <summary><span class="tagn">RQ2</span> How difficult is multi-class attack classification? <span class="chev">▾</span></summary>
+          <div class="rq-body">Harder on five of six benchmarks. The best binary-to-multi macro-F1 gap
+          reaches <span class="mono">0.391</span> on UNSW-NB15 and <span class="mono">0.320</span> on
+          NF-UNSW-NB15-v2. NF-BoT-IoT-v2 is the exception at <span class="mono">0.013</span>. Difficulty
+          is greatest where several low-support attack classes must be separated from one another rather
+          than merely from benign traffic.</div>
+        </details>
+        <details class="rq">
+          <summary><span class="tagn">RQ3</span> How robust are the models to KDDTest-21? <span class="chev">▾</span></summary>
+          <div class="rq-body">The best binary macro-F1 falls from <span class="mono">0.787</span> to
+          <span class="mono">0.539</span>; the best multi-class result from <span class="mono">0.620</span>
+          to <span class="mono">0.526</span>. Rankings remain partly stable, absolute performance does not
+          — stress evaluation should accompany conventional held-out testing whenever a benchmark supplies
+          a harder distribution.</div>
+        </details>
+        <details class="rq">
+          <summary><span class="tagn">RQ4</span> Which standalone model balances performance and cost? <span class="chev">▾</span></summary>
+          <div class="rq-body">Random Forest leads the standalone validation ranking
+          (<span class="mono">0.867</span>, eleven of twelve wins) and remains the strongest base algorithm
+          on the final test matrix, though its serialised footprint can be large. Decision Tree is faster
+          and smaller at lower macro-F1; MLP is compact and competitive; the FT-Transformer is compact
+          after training but carries the highest fitting cost under the fixed CPU configuration.</div>
+        </details>
+        <details class="rq">
+          <summary><span class="tagn">RQ5</span> How faithful is the scratch implementation? <span class="chev">▾</span></summary>
+          <div class="rq-body">Mean test macro-F1 <span class="mono">0.804</span>, retaining 98.4% of the
+          library forest's <span class="mono">0.818</span>. Binary means are almost identical
+          (<span class="mono">0.930</span> vs <span class="mono">0.931</span>); multi-class means differ
+          more (<span class="mono">0.678</span> vs <span class="mono">0.704</span>). The median absolute
+          case-level difference is only <span class="mono">0.0023</span>, but NF-BoT-IoT-v2 and
+          NF-CSE-CIC-IDS2018-v2 multi-class reveal larger losses — fidelity is strong overall, and not
+          uniform across problem complexity.</div>
+        </details>
+      </div>
+
+      <div class="card">
+        <h3 class="sub">Security implications</h3>
+        <ul class="ticks">
+          <li><strong>Balanced metrics are operational controls.</strong> Macro recall and confusion matrices expose the attacks that accuracy hides. A detector can classify most traffic correctly while missing a low-volume attack class entirely.</li>
+          <li><strong>Score quality and threshold quality differ.</strong> High ROC-AUC signals strong ranking but does not guarantee the best macro-F1 at the default decision rule. Thresholds should reflect false-negative and false-positive costs.</li>
+          <li><strong>Benchmark separability is not deployment proof.</strong> Near-perfect CIC-IDS2017 results have to be read against that dataset's scenario construction and documented data-quality history.</li>
+          <li><strong>Feature leakage can imitate intelligence.</strong> Removing addresses, timestamps, flow identifiers and configured ports is what stops a model from learning a laboratory scenario instead of attack behaviour.</li>
+          <li><strong>Transparent artefacts improve assurance.</strong> The scratch forest's JSON/NPZ representation, frozen schema, deterministic seed and explicit node arrays are all inspectable — there is no opaque pre-trained estimator object to trust.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card rv" style="margin-top:16px">
+      <h3 class="sub">Threats to validity</h3>
+      <div class="grid g2" style="gap:22px">
+        <div>
+          <h4 class="mini">Internal</h4>
+          <p class="muted" style="font-size:13.8px">Random row splitting can still place related flows
+          from one attack scenario into different partitions, particularly in CIC-style datasets, which
+          may overstate within-benchmark generalisation. Training-only de-duplication substantially
+          changes the fitted distribution for NF-BoT-IoT-v2 and NF-UNSW-NB15-v2 — the actual row counts
+          are reported explicitly for that reason.</p>
+          <h4 class="mini" style="margin-top:18px">Construct</h4>
+          <p class="muted" style="font-size:13.8px">Macro-F1 is mathematically comparable across
+          benchmarks, but a score on a four-category task is not semantically identical to the same score
+          on a larger taxonomy. The scratch forest's split-frequency importance and the serialised-size
+          comparison are useful operational evidence, not like-for-like algorithmic identities.</p>
+        </div>
+        <div>
+          <h4 class="mini">External</h4>
+          <p class="muted" style="font-size:13.8px">All six benchmarks originate from controlled,
+          synthetic or reprocessed environments. They cannot fully represent production networks,
+          encrypted application traffic, evolving attacks or adversaries adapting to the detector.
+          NSL-KDD is especially old and the NF-v2 files are derivative representations. The results are
+          comparative benchmark evidence, not guaranteed production detection rates.</p>
+          <h4 class="mini" style="margin-top:18px">Conclusion</h4>
+          <p class="muted" style="font-size:13.8px">Fixed reference hyperparameters improve consistency
+          but may disadvantage models sensitive to regularisation, epoch count or depth. One deterministic
+          seed is reported; the large test partitions reduce sampling noise, but repeated-seed intervals
+          would give stronger evidence about ensemble variance and the scratch-versus-library comparison.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ══════════════════════════ ENGINEERING ══════════════════════════ -->
+<section id="engineering">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="sec-num">09 — Engineering</span>
+      <h2 class="sec-title">Repository, tests and reproduction</h2>
+      <p class="sec-lede">
+        Roughly 5,600 lines of Python across four stages, with dataset-specific knowledge kept in YAML
+        and a synthetic-fixture test suite that runs without a single byte of real benchmark data.
+      </p>
+    </div>
+
+    <div class="grid g2 rv">
+      <div class="card">
+        <h4 class="mini">Repository layout</h4>
+<pre style="border-radius:var(--radius-sm); border-top:1px solid var(--line); font-size:12.2px"><code>Code/
+├── config/
+│   ├── datasets.yaml      <span class="cm"># paths, schemas, label maps, quirks</span>
+│   ├── preprocess.yaml    <span class="cm"># split policy, transforms, selection</span>
+│   └── models.yaml        <span class="cm"># params, tuning spaces, ensembles</span>
+├── src/
+│   ├── data/              <span class="cm"># stage 1 — adapters, chunked readers,</span>
+│   │                      <span class="cm">#   cleaning, labels, quality reports</span>
+│   ├── features/          <span class="cm"># stage 2 — leakage-safe transforms</span>
+│   │                      <span class="cm">#   fitted on train, frozen to JSON</span>
+│   ├── models/            <span class="cm"># stage 3 — zoo, runner, ensembles,</span>
+│   │                      <span class="cm">#   pure-NumPy evaluator, torch nets</span>
+│   └── deployment/        <span class="cm"># stage 4 — RandomForestScratch +</span>
+│                          <span class="cm">#   self-contained deploy bundle</span>
+├── tests/                 <span class="cm"># ~30 synthetic-fixture tests;</span>
+│                          <span class="cm">#   run_smoke.py works without pytest</span>
+├── run_pipeline.py  run_preprocess.py
+├── run_models.py    run_deploy.py
+├── requirements.txt
+└── linux_setup.sh         <span class="cm"># venv + deps + smoke test</span></code></pre>
+      </div>
+
+      <div class="card">
+        <h4 class="mini">What the test suite guarantees</h4>
+        <ul class="ticks">
+          <li>The cleaning quirks each dataset exhibits — repeated header rows, Infinity cells, missing-value markers, encoding faults, label-spelling drift.</li>
+          <li>Split stratification, and that no exact duplicate leaks from training into validation or test.</li>
+          <li>Schema JSON round-trips: fit → save → load → apply produces an identical matrix.</li>
+          <li>No-leakage guarantees, and that unseen categories at inference never change the feature dimension.</li>
+          <li>Metric equivalence with scikit-learn to at least 1e-9 across accuracy, macro/weighted P/R/F1 and AUC.</li>
+          <li>Ensemble construction, tuning behaviour and per-model training caps.</li>
+          <li>Scratch-forest determinism on save/reload, and synthetic parity against a library forest under aligned hyperparameters.</li>
+        </ul>
+        <p class="dim" style="font-size:12.6px; margin-top:16px">Tests requiring PyArrow or PyTorch skip
+        cleanly when those packages are absent, so the suite passes on both a bare and a full install.</p>
+      </div>
+    </div>
+
+    <div class="grid g2 rv" style="margin-top:16px">
+      <div class="card">
+        <h4 class="mini">Reproducibility controls</h4>
+        <dl class="kvs">
+          <div class="kv"><dt>Seed</dt><dd>42 — governs splitting, sampling, model initialisation, tuning draws and ensemble construction; recorded on every result row</dd></div>
+          <div class="kv"><dt>Provenance</dt><dd>Caps, solver substitutions and scratch provenance stored in config or <code class="inl">params_note</code></dd></div>
+          <div class="kv"><dt>Validation gate</dt><dd>The report generator asserts the exact six-dataset scope, ten model identifiers, 348 rows, 120 standard-test rows and absence of duplicate dataset–task–model–split keys before any table or figure is drawn</dd></div>
+          <div class="kv"><dt>Single source of truth</dt><dd>Every figure and table derives from one tidy evidence CSV</dd></div>
+        </dl>
+      </div>
+      <div class="card">
+        <h4 class="mini">Environment</h4>
+        <p class="muted" style="font-size:14px">Python 3.10+. PyTorch is optional — without it the
+        FT-Transformer is skipped gracefully and everything else runs unchanged.</p>
+<pre style="border-radius:var(--radius-sm); border-top:1px solid var(--line); font-size:12.3px; margin-top:14px"><code><span class="cm"># Linux / macOS</span>
+<span class="fn">cd</span> Code
+<span class="fn">chmod</span> +x linux_setup.sh
+./linux_setup.sh            <span class="cm"># venv + deps + smoke tests</span>
+<span class="fn">source</span> .venv/bin/activate
+
+<span class="cm"># Optional — FT-Transformer only</span>
+pip install torch --index-url \
+  https://download.pytorch.org/whl/cpu
+
+<span class="cm"># Tests</span>
+python -m pytest tests -q
+python tests/run_smoke.py   <span class="cm"># no pytest needed</span></code></pre>
+        <div class="note warn" style="margin-top:16px; font-size:13.4px">
+          Full unsampled CIC-IDS2017 and CSE-CIC-IDS2018 loads want roughly 10–16 GB of RAM. On smaller
+          machines use <code class="inl">--sample-frac</code> at stage 1 or <code class="inl">--train-cap</code>
+          at stage 3 — both are seeded and recorded in the results.
+        </div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-top:26px">
+      <h4 class="mini">Recommended extensions</h4>
+      <div class="grid g2" style="gap:16px">
+        <ul class="plain">
+          <li>Repeat candidate and scratch experiments over multiple seeds and report confidence intervals.</li>
+          <li>Run aligned 100-tree and 200-tree library-versus-scratch comparisons on every dataset.</li>
+          <li>Introduce optional parallel tree construction while preserving deterministic per-tree seeds.</li>
+          <li>Optimise split search via pre-sorting, histogram thresholds or candidate-threshold sub-sampling.</li>
+        </ul>
+        <ul class="plain">
+          <li>Evaluate reduced-depth and reduced-tree-count scratch variants for latency-constrained deployment.</li>
+          <li>Perform day-aware or scenario-aware holdouts for CIC-IDS2017 and the NF-CSE derivatives.</li>
+          <li>Calibrate probabilities and optimise thresholds using explicit false-negative costs.</li>
+          <li>Evaluate the deployment bundle on a newly collected feature table transformed through the existing frozen schema.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ FOOTER ══════════════════════════ -->
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div class="fl">
+        <h4>GUARDIAN-NIDS</h4>
+        <p>A Generalised, Unified Analytics for Reproducible Detection of Intrusions Across Networks:
+        A Six-Benchmark Evaluation of Classical, Neural Nets, and Ensemble-Style Models.</p>
+        <p style="margin-top:12px">Chew Wei Ze Alvin · MSSD 51.506 Security Tools Lab 1, Project 2 —
+        Cyber Analytics · M.Sc. Security by Design, Singapore University of Technology and Design ·
+        submitted 24 August 2026.</p>
+      </div>
+      <div>
+        <h4 style="margin-bottom:14px">Links</h4>
+        <div class="foot-links" style="flex-direction:column; align-items:flex-start">
+          <a class="btn" href="https://github.com/alvin21mfmlai/GUARDIAN-NIDS" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 00-3.79 23.4c.6.11.82-.26.82-.58v-2.2c-3.34.72-4.04-1.6-4.04-1.6-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.34-5.47-5.96 0-1.32.47-2.39 1.24-3.23-.12-.31-.54-1.53.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 016 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.65.24 2.87.12 3.18.77.84 1.24 1.91 1.24 3.23 0 4.63-2.8 5.65-5.48 5.95.43.37.82 1.1.82 2.22v3.29c0 .32.21.7.82.58A12 12 0 0012 .5z"/></svg>
+            Repository
+          </a>
+          <a class="btn" href="#results">Results &amp; evidence</a>
+          <a class="btn" href="#top">Back to top ↑</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-rule"></div>
+    <div class="foot-bot">
+      <span>© 2026 Chew Wei Ze Alvin</span>
+      <span>seed 42 · 348 records · 6 benchmarks · 10 strategies</span>
+    </div>
+  </div>
+</footer>
+
+</main>
+<div id="tip" role="status" aria-live="polite"></div>
+<script>
+(function(){
+"use strict";
+
+/* =============================================================
+   DATA — every figure below is transcribed from the final report
+   (MSSD 51.506 Project 2, tables 2, 5, 8-17) and the tidy
+   evidence file results_finalWithRF_Scratch.csv.
+   ============================================================= */
+
+var STRATEGIES = [
+  {k:"gnb",   ab:"GNB",   name:"Gaussian NB",        full:"Gaussian Naive Bayes",  kind:"base"},
+  {k:"lr",    ab:"LR",    name:"Logistic Reg.",      full:"Logistic Regression",   kind:"base"},
+  {k:"dt",    ab:"DT",    name:"Decision Tree",      full:"Decision Tree",         kind:"base"},
+  {k:"rf",    ab:"RF",    name:"Random Forest",      full:"Random Forest (library)", kind:"base"},
+  {k:"rfs",   ab:"RF-S",  name:"RF (scratch)",       full:"Random Forest — from scratch (NumPy)", kind:"scratch"},
+  {k:"svm",   ab:"SVM",   name:"Linear SVM",         full:"Linear SVM",            kind:"base"},
+  {k:"mlp",   ab:"MLP",   name:"MLP",                full:"Multilayer Perceptron", kind:"base"},
+  {k:"ftt",   ab:"FT-T",  name:"FT-Transformer",     full:"FT-Transformer",        kind:"base"},
+  {k:"soft",  ab:"Soft",  name:"Soft voting",        full:"Soft-voting Ensemble",  kind:"ens"},
+  {k:"stack", ab:"Stack", name:"Stacked-LR",         full:"Stacked-LR Ensemble",   kind:"ens"}
+];
+
+var DATASETS = [
+  {k:"nsl",    short:"NSL",      name:"NSL-KDD",
+   src:"UNB / CIC", train:107072, val:18895, test:22544, feats:97,
+   note:"Official KDDTrain+/KDDTest+; 15% validation carved from train; KDDTest-21 retained as a separate stress set.",
+   scope:"Binary; Normal, DoS, Probe, R2L, U2R",
+   blurb:"41 connection-level predictors. Historical baseline, rapid end-to-end verification and the only benchmark with an explicit harder stress split."},
+  {k:"unsw",   short:"UNSW",     name:"UNSW-NB15",
+   src:"UNSW Canberra", train:1438724, val:381009, test:381005, feats:54,
+   note:"Seeded stratified 70/15/15 partition of the complete four-file corpus.",
+   scope:"Binary; Normal plus nine attack categories",
+   blurb:"The complete four-file corpus, roughly 2.54 million engineered records. Large contemporary enterprise benchmark and the primary scalability test on heterogeneous features."},
+  {k:"cic17",  short:"CIC17",    name:"CIC-IDS2017",
+   src:"CIC / UNB", train:1774295, val:424615, test:424609, feats:48,
+   note:"Seeded stratified 70/15/15 after concatenating the eight MachineLearningCVE day files.",
+   scope:"Binary; benign plus detailed native attack labels",
+   blurb:"Roughly 2.83 million CICFlowMeter records across eight day files. High-performing modern benchmark, rare-class analysis and a cleaning stress test."},
+  {k:"nfunsw", short:"NF-UNSW",  name:"NF-UNSW-NB15-v2",
+   src:"Univ. of Queensland", train:174190, val:298014, test:298011, feats:31,
+   note:"Seeded stratified 70/15/15; exact duplicates removed from training only.",
+   scope:"Binary; source-specific multi-class labels",
+   blurb:"UNSW-NB15 re-extracted into the standard 43-feature NetFlow-v2 schema — a direct comparison of a native representation against a compact common flow schema."},
+  {k:"nfbot",  short:"NF-BoT",   name:"NF-BoT-IoT-v2",
+   src:"Univ. of Queensland", train:66378, val:2281398, test:2281395, feats:33,
+   note:"Seeded stratified 70/15/15; training-only de-duplication substantially reduces the fitted set.",
+   scope:"Binary; four source-specific attack categories",
+   blurb:"BoT-IoT in the NetFlow-v2 schema. Extreme class imbalance and heavy duplication — the benchmark where accuracy is easiest to misread."},
+  {k:"nfcse",  short:"NF-CSE",   name:"NF-CSE-CIC-IDS2018-v2",
+   src:"Univ. of Queensland", train:3387267, val:1284852, test:1284846, feats:31,
+   note:"Seeded stratified 70/15/15; the retained training partition exceeds 3.38 million rows.",
+   scope:"Binary; consolidated source-specific attack families",
+   blurb:"CSE-CIC-IDS2018 in the NetFlow-v2 schema. The largest standardised benchmark here, with substantial model-size and runtime demands."}
+];
+
+/* Table 9 — standard-test macro-F1. Column order matches STRATEGIES. */
+var F1 = {
+  "nsl|binary":    [0.466,0.755,0.785,0.759,0.761,0.753,0.787,0.774,0.771,0.785],
+  "nsl|multi":     [0.370,0.588,0.518,0.532,0.531,0.530,0.560,0.609,0.592,0.620],
+  "unsw|binary":   [0.811,0.973,0.981,0.984,0.983,0.971,0.983,0.974,0.974,0.980],
+  "unsw|multi":    [0.200,0.391,0.557,0.586,0.572,0.299,0.510,0.446,0.471,0.593],
+  "cic17|binary":  [0.552,0.871,0.999,0.999,0.998,0.866,0.976,0.969,0.974,0.999],
+  "cic17|multi":   [0.456,0.467,0.868,0.876,0.860,0.438,0.700,0.422,0.767,0.826],
+  "nfunsw|binary": [0.584,0.800,0.974,0.976,0.974,0.799,0.970,0.965,0.967,0.967],
+  "nfunsw|multi":  [0.043,0.212,0.518,0.586,0.558,0.256,0.401,0.391,0.501,0.656],
+  "nfbot|binary":  [0.666,0.870,0.564,0.881,0.880,0.842,0.818,0.560,0.922,0.875],
+  "nfbot|multi":   [0.207,0.620,0.820,0.904,0.858,0.786,0.715,0.747,0.790,0.908],
+  "nfcse|binary":  [0.521,0.923,0.948,0.987,0.985,0.930,0.962,0.976,0.986,0.983],
+  "nfcse|multi":   [0.396,0.381,0.689,0.743,0.691,0.378,0.732,0.464,0.755,0.700]
+};
+
+/* Table 11 — descriptive ranking of all ten evaluated strategies */
+var RANK = [
+  {k:"stack", mean:0.824, bin:0.931, mul:0.717, rank:2.75, wins:5},
+  {k:"rf",    mean:0.818, bin:0.931, mul:0.704, rank:2.42, wins:4},
+  {k:"rfs",   mean:0.804, bin:0.930, mul:0.678, rank:3.75, wins:0},
+  {k:"soft",  mean:0.789, bin:0.932, mul:0.646, rank:4.25, wins:2},
+  {k:"dt",    mean:0.768, bin:0.875, mul:0.662, rank:4.75, wins:0},
+  {k:"mlp",   mean:0.759, bin:0.916, mul:0.603, rank:4.92, wins:1},
+  {k:"ftt",   mean:0.691, bin:0.870, mul:0.513, rank:6.67, wins:0},
+  {k:"lr",    mean:0.654, bin:0.865, mul:0.443, rank:7.67, wins:0},
+  {k:"svm",   mean:0.654, bin:0.860, mul:0.448, rank:8.33, wins:0},
+  {k:"gnb",   mean:0.439, bin:0.600, mul:0.279, rank:9.50, wins:0}
+];
+
+/* Table 5 — validation ranking of the seven standalone algorithms */
+var VALRANK = [
+  {k:"rf",  mean:0.867, wins:11},
+  {k:"dt",  mean:0.817, wins:1},
+  {k:"mlp", mean:0.810, wins:0},
+  {k:"ftt", mean:0.716, wins:0},
+  {k:"svm", mean:0.693, wins:0},
+  {k:"lr",  mean:0.681, wins:0},
+  {k:"gnb", mean:0.464, wins:0}
+];
+
+/* Table 8 — best candidate per dataset-task */
+var BEST = [
+  ["nsl","Binary","MLP",0.787,0.807,0.804,0.787],
+  ["nsl","Multi","Stacked-LR Ensemble",0.783,0.730,0.645,0.620],
+  ["unsw","Binary","Random Forest (library)",0.993,0.979,0.991,0.984],
+  ["unsw","Multi","Stacked-LR Ensemble",0.972,0.550,0.763,0.593],
+  ["cic17","Binary","Stacked-LR Ensemble",0.999,0.998,0.999,0.999],
+  ["cic17","Multi","Random Forest (library)",0.998,0.872,0.898,0.876],
+  ["nfunsw","Binary","Random Forest (library)",0.996,0.960,0.992,0.976],
+  ["nfunsw","Multi","Stacked-LR Ensemble",0.988,0.600,0.825,0.656],
+  ["nfbot","Binary","Soft-voting Ensemble",0.999,0.971,0.882,0.922],
+  ["nfbot","Multi","Stacked-LR Ensemble",0.991,0.867,0.992,0.908],
+  ["nfcse","Binary","Random Forest (library)",0.995,0.993,0.981,0.987],
+  ["nfcse","Multi","Soft-voting Ensemble",0.965,0.829,0.768,0.755]
+];
+
+/* Table 14 — binary vs multi gap */
+var GAP = [
+  ["nsl",0.787,0.620,0.167,"21.2%"],
+  ["unsw",0.984,0.593,0.391,"39.7%"],
+  ["cic17",0.999,0.876,0.123,"12.3%"],
+  ["nfunsw",0.976,0.656,0.320,"32.8%"],
+  ["nfbot",0.922,0.908,0.013,"1.4%"],
+  ["nfcse",0.987,0.755,0.232,"23.5%"]
+];
+
+/* Table 15 — ten largest accuracy / macro-F1 gaps (multi-class) */
+var INFLATE = [
+  ["NF-UNSW-NB15-v2","Linear SVM",0.934,0.256,0.678],
+  ["NF-UNSW-NB15-v2","Logistic Regression",0.880,0.212,0.668],
+  ["UNSW-NB15","Linear SVM",0.951,0.299,0.652],
+  ["NF-UNSW-NB15-v2","FT-Transformer",0.974,0.391,0.583],
+  ["NF-UNSW-NB15-v2","MLP",0.983,0.401,0.582],
+  ["UNSW-NB15","Logistic Regression",0.961,0.391,0.571],
+  ["NF-CSE-CIC-IDS2018-v2","Linear SVM",0.900,0.378,0.522],
+  ["NF-CSE-CIC-IDS2018-v2","Logistic Regression",0.902,0.381,0.521],
+  ["UNSW-NB15","FT-Transformer",0.963,0.446,0.517],
+  ["UNSW-NB15","Soft-voting Ensemble",0.969,0.471,0.497]
+];
+
+/* Table 13 — library vs scratch Random Forest, case level */
+/* Deltas are quoted exactly as the report records them — computed at full
+   precision, so they can differ in the last digit from the difference of the
+   three-decimal values displayed alongside. */
+var RFCMP = [
+  ["nsl",    0.759,0.761,"+0.002", 0.532,0.531,"−0.001"],
+  ["unsw",   0.984,0.983,"−0.001", 0.586,0.572,"−0.015"],
+  ["cic17",  0.999,0.998,"−0.000", 0.876,0.860,"−0.015"],
+  ["nfunsw", 0.976,0.974,"−0.002", 0.586,0.558,"−0.027"],
+  ["nfbot",  0.881,0.880,"−0.002", 0.904,0.858,"−0.045"],
+  ["nfcse",  0.987,0.985,"−0.002", 0.743,0.691,"−0.052"]
+];
+
+/* Table 16 — NSL-KDD KDDTest+ vs KDDTest-21 (nine candidate strategies) */
+var STRESS = [
+  ["gnb",  0.466,0.342,0.124, 0.370,0.312,0.058],
+  ["lr",   0.755,0.493,0.262, 0.588,0.484,0.104],
+  ["dt",   0.785,0.531,0.254, 0.518,0.424,0.095],
+  ["rf",   0.759,0.520,0.239, 0.532,0.432,0.099],
+  ["svm",  0.753,0.490,0.263, 0.530,0.422,0.107],
+  ["mlp",  0.787,0.539,0.248, 0.560,0.462,0.099],
+  ["ftt",  0.774,0.520,0.255, 0.609,0.495,0.113],
+  ["soft", 0.771,0.516,0.255, 0.592,0.496,0.096],
+  ["stack",0.785,0.536,0.250, 0.620,0.526,0.094]
+];
+
+/* Table 17 — standalone performance & resource summary.
+   fitS / predS are median seconds; sizeMB is median serialised size. */
+var EFF = [
+  {k:"rf",  mean:0.818, fitS:68.0,   fitTxt:"1.13 min",  totalTxt:"38.29 min", predS:1.65,  predTxt:"1.65 s",  sizeMB:166.34, sizeTxt:"166.34 MB", maxTxt:"2.91 GB"},
+  {k:"rfs", mean:0.804, fitS:716.2,  fitTxt:"11.94 min", totalTxt:"10.30 h",   predS:26.93, predTxt:"26.93 s", sizeMB:4.40,   sizeTxt:"4.40 MB",   maxTxt:"31.25 MB"},
+  {k:"dt",  mean:0.768, fitS:6.19,   fitTxt:"6.19 s",    totalTxt:"5.94 min",  predS:0.07,  predTxt:"0.07 s",  sizeMB:0.694,  sizeTxt:"710.79 kB", maxTxt:"4.98 MB"},
+  {k:"mlp", mean:0.759, fitS:76.8,   fitTxt:"1.28 min",  totalTxt:"37.82 min", predS:0.78,  predTxt:"0.78 s",  sizeMB:0.167,  sizeTxt:"171.62 kB", maxTxt:"255.83 kB"},
+  {k:"ftt", mean:0.691, fitS:3816.0, fitTxt:"1.06 h",    totalTxt:"14.30 h",   predS:55.35, predTxt:"55.35 s", sizeMB:0.249,  sizeTxt:"254.85 kB", maxTxt:"282.76 kB"},
+  {k:"lr",  mean:0.654, fitS:26.43,  fitTxt:"26.43 s",   totalTxt:"38.77 min", predS:0.05,  predTxt:"0.05 s",  sizeMB:0.0012, sizeTxt:"1.20 kB",   maxTxt:"3.58 kB"},
+  {k:"svm", mean:0.654, fitS:43.89,  fitTxt:"43.89 s",   totalTxt:"17.98 min", predS:0.04,  predTxt:"0.04 s",  sizeMB:0.0016, sizeTxt:"1.63 kB",   maxTxt:"4.42 kB"},
+  {k:"gnb", mean:0.439, fitS:0.48,   fitTxt:"0.48 s",    totalTxt:"8.05 s",    predS:0.46,  predTxt:"0.46 s",  sizeMB:0.0020, sizeTxt:"1.96 kB",   maxTxt:"6.32 kB"}
+];
+
+/* Table 3 / 4 — model roles and reference configurations */
+var MODELINFO = {
+  gnb:  {why:"A very fast probabilistic baseline that tests whether class-conditional marginal distributions alone are sufficient. Its weakness relative to the tree and neural models is itself evidence that non-Gaussian structure and feature interactions matter.", cfg:"Library default, fixed variance smoothing"},
+  lr:   {why:"An interpretable linear baseline with balanced class weighting and continuous scores for ROC analysis. Cannot express complex interactions without explicit feature construction.", cfg:"C = 1.0 · balanced class weight · max 1,000 iterations · SGD log-loss substitution above 500k rows"},
+  dt:   {why:"Transparent non-linear rules at low prediction cost, and the structural building block of the forest. High variance is controlled through depth and minimum-leaf constraints.", cfg:"max_depth 30 · min_samples_leaf 5 · balanced class weight"},
+  rf:   {why:"The strongest tabular ensemble here: it models non-linear interactions and reduces single-tree variance. Training, inference and storage all become substantial on multi-million-row data.", cfg:"200 trees · min_samples_leaf 2 · balanced_subsample · parallel fitting"},
+  svm:  {why:"A margin-based comparator for high-dimensional one-hot encoded inputs, contrasting with Logistic Regression through a different loss and objective. The boundary stays linear.", cfg:"C = 1.0 · balanced class weight · SGD hinge substitution above 500k rows"},
+  mlp:  {why:"The most defensible conventional neural design for this data: each record is an independent engineered flow, so an RNN would need a constructed temporal sequence and a 1-D CNN would assume a column ordering these schemas do not possess.", cfg:"hidden (128, 64) · α 1e-4 · batch 512 · lr 1e-3 · early stopping"},
+  ftt:  {why:"An attention-based tabular architecture that learns feature-token interactions. Its result shows that greater architectural sophistication does not automatically buy a favourable performance–cost trade-off.", cfg:"token width 64 · 2 blocks · 8 heads · attn dropout 0.2 · FF dropout 0.1 · AdamW · batch 1,024 · 10 epochs · 500k-row cap"},
+  soft: {why:"Aligns each base model's class-score matrix, converts decision scores to probability-like values and averages the seven matrices. Almost free to fit — but a deployment must still retain every constituent estimator.", cfg:"Unweighted mean of seven aligned base-model score matrices"},
+  stack:{why:"Learns a combination rather than assuming equal weights. Validation score vectors from the seven base models feed a balanced Logistic Regression meta-learner; test predictions are generated only after the meta-learner is frozen.", cfg:"Balanced Logistic Regression meta-learner, C = 1.0, fitted on validation score matrices"},
+  rfs:  {why:"The selected algorithm rebuilt in NumPy alone — CART/Gini trees, bootstrap sampling, per-node √p feature subsampling, balanced-subsample weighting, soft-vote aggregation and array-based persistence with no pickle.", cfg:"100 trees · unlimited depth · min split/leaf 2 · sqrt features re-drawn per node · balanced_subsample · seed 42"}
+};
+
+var CODE = {
+split:
+'<span class="cm"># src/deployment/random_forest_scratch.py — exhaustive weighted-Gini split search.</span>\n'+
+'<span class="cm"># For each candidate feature: sort rows, sweep the boundary left to right holding</span>\n'+
+'<span class="cm"># cumulative weighted class counts, and score every position where the value changes.</span>\n'+
+'\n'+
+'<span class="kw">for</span> f <span class="kw">in</span> feat_ids:\n'+
+'    col   <span class="op">=</span> X[:, f]\n'+
+'    order <span class="op">=</span> np.<span class="fn">argsort</span>(col, kind<span class="op">=</span><span class="st">"mergesort"</span>)   <span class="cm"># stable -> deterministic</span>\n'+
+'    xs, ys, ws <span class="op">=</span> col[order], y[order], w[order]\n'+
+'\n'+
+'    <span class="cm"># one-hot weighted labels -> cumulative class counts on the left</span>\n'+
+'    onehot <span class="op">=</span> np.<span class="fn">zeros</span>((n, self.n_classes))\n'+
+'    onehot[np.<span class="fn">arange</span>(n), ys] <span class="op">=</span> ws\n'+
+'    left_counts  <span class="op">=</span> np.<span class="fn">cumsum</span>(onehot, axis<span class="op">=</span><span class="nu">0</span>)          <span class="cm"># (n, k)</span>\n'+
+'    right_counts <span class="op">=</span> parent_counts[<span class="kw">None</span>, :] <span class="op">-</span> left_counts\n'+
+'\n'+
+'    <span class="cm"># valid boundaries: value actually changes AND both sides >= min_samples_leaf</span>\n'+
+'    i     <span class="op">=</span> np.<span class="fn">arange</span>(<span class="nu">1</span>, n)\n'+
+'    valid <span class="op">=</span> (xs[<span class="nu">1</span>:] <span class="op">!=</span> xs[:<span class="op">-</span><span class="nu">1</span>]) <span class="op">&amp;</span> (i <span class="op">&gt;=</span> msl) <span class="op">&amp;</span> ((n <span class="op">-</span> i) <span class="op">&gt;=</span> msl)\n'+
+'    <span class="kw">if</span> <span class="kw">not</span> valid.<span class="fn">any</span>(): <span class="kw">continue</span>\n'+
+'\n'+
+'    g_left  <span class="op">=</span> <span class="nu">1.0</span> <span class="op">-</span> np.<span class="fn">sum</span>((lc <span class="op">/</span> lw[:, <span class="kw">None</span>]) <span class="op">**</span> <span class="nu">2</span>, axis<span class="op">=</span><span class="nu">1</span>)\n'+
+'    g_right <span class="op">=</span> <span class="nu">1.0</span> <span class="op">-</span> np.<span class="fn">sum</span>((rc <span class="op">/</span> rw[:, <span class="kw">None</span>]) <span class="op">**</span> <span class="nu">2</span>, axis<span class="op">=</span><span class="nu">1</span>)\n'+
+'    gains   <span class="op">=</span> parent_gini <span class="op">-</span> (lw <span class="op">*</span> g_left <span class="op">+</span> rw <span class="op">*</span> g_right) <span class="op">/</span> total_w\n'+
+'\n'+
+'    j <span class="op">=</span> <span class="fn">int</span>(np.<span class="fn">argmax</span>(gains))\n'+
+'    <span class="kw">if</span> gains[j] <span class="op">&gt;</span> best_gain <span class="op">+</span> <span class="nu">1e-12</span>:\n'+
+'        best_gain, best_feat <span class="op">=</span> <span class="fn">float</span>(gains[j]), <span class="fn">int</span>(f)\n'+
+'        pos <span class="op">=</span> idx[j]\n'+
+'        best_thr <span class="op">=</span> <span class="fn">float</span>((xs[pos] <span class="op">+</span> xs[pos <span class="op">+</span> <span class="nu">1</span>]) <span class="op">/</span> <span class="nu">2.0</span>)   <span class="cm"># midpoint</span>',
+
+forest:
+'<span class="cm"># Forest construction: one bootstrap per tree, class weights recomputed from</span>\n'+
+'<span class="cm"># EACH bootstrap sample, a fresh generator per tree for deterministic replay.</span>\n'+
+'\n'+
+'<span class="kw">def</span> <span class="fn">_class_weights</span>(self, y_sub, y_all):\n'+
+'    <span class="st">"""balanced_subsample: w_c = n_b / (C * n_b,c)."""</span>\n'+
+'    <span class="kw">if</span> self.class_weight <span class="kw">is</span> <span class="kw">None</span>:\n'+
+'        <span class="kw">return</span> np.<span class="fn">ones</span>(<span class="fn">len</span>(y_sub))\n'+
+'    ref    <span class="op">=</span> y_sub <span class="kw">if</span> self.class_weight <span class="op">==</span> <span class="st">"balanced_subsample"</span> <span class="kw">else</span> y_all\n'+
+'    counts <span class="op">=</span> np.<span class="fn">bincount</span>(ref, minlength<span class="op">=</span>self.n_classes_).<span class="fn">astype</span>(<span class="fn">float</span>)\n'+
+'    counts[counts <span class="op">==</span> <span class="nu">0</span>] <span class="op">=</span> <span class="nu">1.0</span>\n'+
+'    <span class="kw">return</span> (<span class="fn">len</span>(ref) <span class="op">/</span> (self.n_classes_ <span class="op">*</span> counts))[y_sub]\n'+
+'\n'+
+'rng <span class="op">=</span> np.random.<span class="fn">default_rng</span>(self.random_state)          <span class="cm"># seed 42</span>\n'+
+'<span class="kw">for</span> t <span class="kw">in</span> <span class="fn">range</span>(self.n_estimators):\n'+
+'    tree_rng <span class="op">=</span> np.random.<span class="fn">default_rng</span>(rng.<span class="fn">integers</span>(<span class="nu">0</span>, <span class="nu">2</span><span class="op">**</span><span class="nu">32</span> <span class="op">-</span> <span class="nu">1</span>))\n'+
+'    idx      <span class="op">=</span> tree_rng.<span class="fn">integers</span>(<span class="nu">0</span>, n, size<span class="op">=</span>n)          <span class="cm"># with replacement</span>\n'+
+'    Xb, yb   <span class="op">=</span> X[idx], y[idx]\n'+
+'    tree     <span class="op">=</span> <span class="fn">DecisionTreeScratch</span>(self.n_classes_, max_features<span class="op">=</span>mf,\n'+
+'                                  rng<span class="op">=</span>tree_rng, <span class="op">...</span>)\n'+
+'    tree.<span class="fn">fit</span>(Xb, yb, sample_weight<span class="op">=</span>self.<span class="fn">_class_weights</span>(yb, y))\n'+
+'    self.trees.<span class="fn">append</span>(tree)\n'+
+'\n'+
+'<span class="cm"># Prediction is a soft vote: mean leaf-probability distribution, then argmax.</span>\n'+
+'<span class="kw">def</span> <span class="fn">predict_proba</span>(self, X):\n'+
+'    acc <span class="op">=</span> np.<span class="fn">zeros</span>((<span class="fn">len</span>(X), self.n_classes_))\n'+
+'    <span class="kw">for</span> tree <span class="kw">in</span> self.trees:\n'+
+'        acc <span class="op">+=</span> tree.<span class="fn">predict_proba</span>(X)\n'+
+'    <span class="kw">return</span> acc <span class="op">/</span> <span class="fn">max</span>(<span class="fn">len</span>(self.trees), <span class="nu">1</span>)',
+
+yaml:
+'<span class="cm"># config/datasets.yaml — all dataset-specific knowledge lives HERE, not in code.</span>\n'+
+'<span class="cm"># Adding a benchmark means adding a block; the pipeline itself never changes.</span>\n'+
+'\n'+
+'<span class="pr">defaults</span>:\n'+
+'  <span class="pr">chunksize</span>: <span class="nu">250000</span>              <span class="cm"># rows per chunk for large CSV reads</span>\n'+
+'  <span class="pr">downcast_numeric</span>: <span class="kw">true</span>        <span class="cm"># float64 -> float32, ints -> smallest safe</span>\n'+
+'  <span class="pr">drop_exact_duplicate_rows</span>: <span class="kw">false</span>   <span class="cm"># report only; dedupe is train-only</span>\n'+
+'  <span class="pr">remove_repeated_header_rows</span>: <span class="kw">true</span> <span class="cm"># CIC files repeat their header mid-file</span>\n'+
+'  <span class="pr">replace_infinity_with_nan</span>: <span class="kw">true</span>\n'+
+'  <span class="pr">normalize_column_names</span>: <span class="kw">true</span>\n'+
+'\n'+
+'<span class="pr">datasets</span>:\n'+
+'  <span class="pr">nsl_kdd</span>:\n'+
+'    <span class="pr">title</span>: <span class="st">"NSL-KDD"</span>\n'+
+'    <span class="pr">adapter</span>: nsl_kdd\n'+
+'    <span class="pr">files</span>:\n'+
+'      <span class="pr">train</span>:  <span class="st">"NSL-KDD/Raw/KDDTrain+.txt"</span>\n'+
+'      <span class="pr">test</span>:   <span class="st">"NSL-KDD/Raw/KDDTest+.txt"</span>\n'+
+'      <span class="pr">test21</span>: {<span class="pr">path</span>: <span class="st">"NSL-KDD/Raw/KDDTest-21.txt"</span>, <span class="pr">optional</span>: <span class="kw">true</span>}\n'+
+'    <span class="pr">categorical_columns</span>: [protocol_type, service, flag]\n'+
+'\n'+
+'<span class="cm"># config/preprocess.yaml — every statistic below is fitted on TRAIN only</span>\n'+
+'<span class="pr">defaults</span>:\n'+
+'  <span class="pr">always_exclude</span>: [label, Label, attack_cat, Attack, type, difficulty]\n'+
+'  <span class="pr">seed</span>: <span class="nu">42</span>\n'+
+'  <span class="pr">val_frac</span>: <span class="nu">0.15</span>              <span class="cm"># carved out of train where official</span>\n'+
+'  <span class="pr">dedupe_train</span>: <span class="kw">true</span>          <span class="cm"># exact duplicates, TRAIN partition only</span>\n'+
+'  <span class="pr">near_constant_share</span>: <span class="nu">0.999</span>\n'+
+'  <span class="pr">correlation_threshold</span>: <span class="nu">0.98</span>\n'+
+'  <span class="pr">onehot_min_frequency</span>: <span class="nu">0.001</span>\n'+
+'  <span class="pr">mi_max_rows</span>: <span class="nu">300000</span>          <span class="cm"># subsample cap for the MI ranking</span>',
+
+cli:
+'<span class="cm"># Stage 1 — load, cleanse, write interim tables + data-quality JSON</span>\n'+
+'python run_pipeline.py <span class="op">--list</span>\n'+
+'python run_pipeline.py <span class="op">--dataset</span> nsl_kdd\n'+
+'python run_pipeline.py <span class="op">--dataset</span> unsw_nb15_full <span class="op">--sample-frac</span> <span class="nu">0.2</span>\n'+
+'python run_pipeline.py <span class="op">--dataset</span> nf_uq_nids_v2 <span class="op">--to-parquet</span>  <span class="cm"># 13.7 GB CSV -> parquet</span>\n'+
+'\n'+
+'<span class="cm"># Stage 2 — fit the frozen preprocessing schema (train-only statistics)</span>\n'+
+'python run_preprocess.py <span class="op">--all</span>\n'+
+'\n'+
+'<span class="cm"># Stage 3 — benchmark every model and ensemble, both tasks</span>\n'+
+'python run_models.py <span class="op">--all --task</span> both\n'+
+'python run_models.py <span class="op">--dataset</span> nsl_kdd <span class="op">--tune</span>        <span class="cm"># random search on val macro-F1</span>\n'+
+'python run_models.py <span class="op">--dataset</span> cic_ids2017 <span class="op">--top-k</span> <span class="nu">20</span>  <span class="cm"># MI-ranked feature subset</span>\n'+
+'\n'+
+'<span class="cm"># Stage 4 — from-scratch Random Forest: train, deploy, classify unseen data</span>\n'+
+'python run_deploy.py train    <span class="op">--dataset</span> nsl_kdd <span class="op">--task</span> binary <span class="op">--n-estimators</span> <span class="nu">100</span>\n'+
+'python run_deploy.py evaluate <span class="op">--bundle</span> ../Pipeline_Output/deploy/nsl_kdd_binary \\\n'+
+'                              <span class="op">--dataset</span> nsl_kdd <span class="op">--raw-file</span> ../Data/NSL-KDD/Raw/KDDTest-21.txt\n'+
+'python run_deploy.py predict  <span class="op">--bundle</span> ../Pipeline_Output/deploy/nsl_kdd_binary \\\n'+
+'                              <span class="op">--dataset</span> nsl_kdd <span class="op">--split</span> test <span class="op">--out</span> preds.csv\n'+
+'python run_deploy.py compare  <span class="op">--dataset</span> nsl_kdd <span class="op">--task</span> binary    <span class="cm"># vs scikit-learn</span>'
+};
+
+/* =============================================================
+   HELPERS
+   ============================================================= */
+var $  = function(s,r){ return (r||document).querySelector(s); };
+var $$ = function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+var byK = {}; STRATEGIES.forEach(function(s){ byK[s.k]=s; });
+var dsByK = {}; DATASETS.forEach(function(d){ dsByK[d.k]=d; });
+var f3 = function(v){ return v.toFixed(3); };
+var nfmt = function(n){ return n.toLocaleString("en-US"); };
+
+/* sequential teal ramp, value in [0,1] */
+function ramp(v){
+  var stops = [[13,43,43],[18,86,79],[26,143,125],[42,196,165],[125,243,220]];
+  var t = Math.max(0, Math.min(1, v)) * (stops.length - 1);
+  var i = Math.min(Math.floor(t), stops.length - 2), f = t - i;
+  var a = stops[i], b = stops[i+1];
+  return "rgb(" + Math.round(a[0]+(b[0]-a[0])*f) + "," +
+                  Math.round(a[1]+(b[1]-a[1])*f) + "," +
+                  Math.round(a[2]+(b[2]-a[2])*f) + ")";
+}
+function inkOn(v){ return v > 0.52 ? "#04120f" : "#dfeaf5"; }
+
+/* tooltip */
+var tip = $("#tip");
+function showTip(e, html){
+  tip.innerHTML = html; tip.classList.add("on");
+  var r = tip.getBoundingClientRect();
+  var x = Math.min(Math.max(e.clientX + 14, 8), window.innerWidth - r.width - 8);
+  var y = e.clientY - r.height - 12;
+  if (y < 8) y = e.clientY + 18;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip(){ tip.classList.remove("on"); }
+
+/* =============================================================
+   DATASET CARDS + TABLE
+   ============================================================= */
+(function(){
+  var cards = DATASETS.map(function(d){
+    var tot = d.train + d.val + d.test;
+    return '<article class="ds">'
+      + '<div class="dt"><h4>' + d.name + '</h4><span class="src">' + d.src + '</span></div>'
+      + '<p>' + d.blurb + '</p>'
+      + '<div class="rowbar" role="img" aria-label="Partition proportions for ' + d.name + '">'
+      +   '<i class="tr" style="width:' + (d.train/tot*100) + '%"></i>'
+      +   '<i class="va" style="width:' + (d.val/tot*100) + '%"></i>'
+      +   '<i class="te" style="width:' + (d.test/tot*100) + '%"></i>'
+      + '</div>'
+      + '<div class="nums"><span><b>' + nfmt(d.train) + '</b> train</span>'
+      +   '<span><b>' + nfmt(d.val) + '</b> val</span>'
+      +   '<span><b>' + nfmt(d.test) + '</b> test</span>'
+      +   '<span><b>' + d.feats + '</b> features</span></div>'
+      + '<p class="dim" style="font-size:12.4px">' + d.scope + '</p>'
+      + '</article>';
+  }).join("");
+  $("#dsCards").innerHTML = cards;
+
+  $("#dsRows").innerHTML = DATASETS.map(function(d){
+    return '<tr><td><span class="k">' + d.name + '</span></td>'
+      + '<td class="num">' + nfmt(d.train) + '</td>'
+      + '<td class="num">' + nfmt(d.val) + '</td>'
+      + '<td class="num">' + nfmt(d.test) + '</td>'
+      + '<td class="num">' + d.feats + '</td>'
+      + '<td style="font-size:13px">' + d.note + '</td></tr>';
+  }).join("");
+})();
+
+/* =============================================================
+   MODEL CARDS
+   ============================================================= */
+(function(){
+  var rankByK = {}; RANK.forEach(function(r){ rankByK[r.k] = r; });
+  function card(k, cls){
+    var s = byK[k], r = rankByK[k], info = MODELINFO[k];
+    return '<article class="mcard ' + (cls||"") + '">'
+      + '<div class="top"><h4>' + s.full + '</h4><span class="score">' + f3(r.mean) + '</span></div>'
+      + '<div class="meter"><i data-w="' + (r.mean*100) + '" style="width:0%"></i></div>'
+      + '<p>' + info.why + '</p>'
+      + '<div class="cfg">' + info.cfg + '</div>'
+      + '</article>';
+  }
+  $("#modelCards").innerHTML = ["gnb","lr","dt","rf","svm","mlp","ftt"].map(function(k){ return card(k); }).join("");
+  $("#ensCards").innerHTML   = card("soft","ens") + card("stack","ens") + card("rfs","scr");
+
+  /* validation ranking bars */
+  $("#valBars").innerHTML = VALRANK.map(function(r){
+    var s = byK[r.k];
+    return '<div class="bar-row"><div class="name">' + (r.k==="rf" ? "<b>"+s.name+"</b>" : s.name) + '</div>'
+      + '<div class="bar-track"><div class="bar-fill' + (r.k==="rf" ? "" : " alt") + '" data-w="' + (r.mean*100) + '" style="width:0%"></div></div>'
+      + '<div class="val">' + f3(r.mean) + '<small>' + r.wins + (r.wins === 1 ? ' win' : ' wins') + '</small></div></div>';
+  }).join("");
+})();
+
+/* =============================================================
+   LEADERBOARD
+   ============================================================= */
+function drawLeaderboard(mode){
+  var field = mode === "bin" ? "bin" : mode === "mul" ? "mul" : "mean";
+  var rows = RANK.slice().sort(function(a,b){ return b[field] - a[field]; });
+  $("#lbBars").innerHTML = rows.map(function(r){
+    var s = byK[r.k];
+    var hi = r.k === "rfs" ? " hi" : "";
+    return '<div class="bar-row"><div class="name"><b>' + s.name + '</b></div>'
+      + '<div class="bar-track"><div class="bar-fill' + hi + '" data-w="' + (r[field]*100) + '" style="width:0%"></div></div>'
+      + '<div class="val">' + f3(r[field]) + '<small>' + (r.k === "rfs" ? "post-hoc" : r.wins + (r.wins === 1 ? " win" : " wins")) + '</small></div></div>';
+  }).join("");
+  animateBars($("#lbBars"));
+}
+
+/* =============================================================
+   HEATMAP
+   ============================================================= */
+function drawHeatmap(filter){
+  var rows = [];
+  DATASETS.forEach(function(d){
+    ["binary","multi"].forEach(function(t){
+      if (filter === "all" || filter === t) rows.push({ds:d, task:t, vals:F1[d.k+"|"+t]});
+    });
+  });
+  var el = $("#heat");
+  el.style.gridTemplateColumns = "132px repeat(" + STRATEGIES.length + ", minmax(56px, 1fr))";
+  var html = '<div class="corner"></div>';
+  STRATEGIES.forEach(function(s){ html += '<div class="clab">' + s.ab + '</div>'; });
+  rows.forEach(function(r){
+    html += '<div class="rlab">' + r.ds.short + '<span class="t">' + (r.task==="binary"?"bin":"mul") + '</span></div>';
+    var max = Math.max.apply(null, r.vals);
+    r.vals.forEach(function(v, i){
+      html += '<div class="hcell' + (v === max ? " rowbest" : "") + '"'
+           +  ' style="background:' + ramp(v) + '; color:' + inkOn(v) + '"'
+           +  ' data-tip="' + r.ds.name + ' · ' + (r.task==="binary"?"binary":"multi-class") + '|'
+           +  STRATEGIES[i].full + '|' + f3(v) + '">' + v.toFixed(3).slice(1) + '</div>';
+    });
+  });
+  el.innerHTML = html;
+  $$(".hcell", el).forEach(function(c){
+    c.addEventListener("mousemove", function(e){
+      var p = c.getAttribute("data-tip").split("|");
+      showTip(e, '<span class="tt">' + p[0] + '</span>' + p[1] + ' — macro-F1 <b>' + p[2] + '</b>');
+    });
+    c.addEventListener("mouseleave", hideTip);
+  });
+}
+
+/* =============================================================
+   GROUPED BAR HELPER
+   ============================================================= */
+function groupedBars(target, cols, max){
+  max = max || 1;
+  $(target).style.setProperty("--cols", cols.length);
+  $(target).innerHTML = cols.map(function(c){
+    var bars = c.bars.map(function(b){
+      return '<div class="gb ' + b.cls + '" data-h="' + (b.v / max * 100) + '" style="height:0%">'
+           + '<span class="tag">' + f3(b.v) + '</span></div>';
+    }).join("");
+    return '<div class="gcol"><div class="pair">' + bars + '</div>'
+         + '<div class="glab">' + c.label + '</div></div>';
+  }).join("");
+  animateBars($(target));
+}
+
+/* animate any bar/meter inside a container once visible */
+function animateBars(root){
+  requestAnimationFrame(function(){
+    $$("[data-w]", root).forEach(function(e){ e.style.width  = e.getAttribute("data-w") + "%"; });
+    $$("[data-h]", root).forEach(function(e){ e.style.height = e.getAttribute("data-h") + "%"; });
+  });
+}
+
+/* =============================================================
+   RESULTS TABLES
+   ============================================================= */
+(function(){
+  $("#bestRows").innerHTML = BEST.map(function(r){
+    return '<tr><td><span class="k">' + dsByK[r[0]].name + '</span></td>'
+      + '<td>' + r[1] + '</td><td>' + r[2] + '</td>'
+      + '<td class="num">' + f3(r[3]) + '</td><td class="num">' + f3(r[4]) + '</td>'
+      + '<td class="num">' + f3(r[5]) + '</td><td class="num best">' + f3(r[6]) + '</td></tr>';
+  }).join("");
+
+  $("#gapRows").innerHTML = GAP.map(function(r){
+    return '<tr><td><span class="k">' + dsByK[r[0]].name + '</span></td>'
+      + '<td class="num">' + f3(r[1]) + '</td><td class="num">' + f3(r[2]) + '</td>'
+      + '<td class="num">' + f3(r[3]) + '</td><td class="num">' + r[4] + '</td></tr>';
+  }).join("");
+
+  $("#gapInflate").innerHTML = INFLATE.map(function(r){
+    return '<tr><td style="font-size:12.6px">' + r[0] + '</td><td style="font-size:12.6px">' + r[1] + '</td>'
+      + '<td class="num">' + f3(r[2]) + '</td><td class="num">' + f3(r[3]) + '</td>'
+      + '<td class="num neg">' + f3(r[4]) + '</td></tr>';
+  }).join("");
+
+  $("#effRows").innerHTML = EFF.map(function(r){
+    var s = byK[r.k];
+    return '<tr><td><span class="k">' + s.full + '</span></td>'
+      + '<td class="num">' + f3(r.mean) + '</td><td class="num">' + r.fitTxt + '</td>'
+      + '<td class="num">' + r.totalTxt + '</td><td class="num">' + r.predTxt + '</td>'
+      + '<td class="num">' + r.sizeTxt + '</td><td class="num">' + r.maxTxt + '</td></tr>';
+  }).join("");
+
+  $("#rfRows").innerHTML = RFCMP.map(function(r){
+    function d(t){
+      var cls = t.charAt(0) === "+" ? "pos" : (t === "−0.000" ? "dim" : "neg");
+      return '<td class="num ' + cls + '">' + t + '</td>';
+    }
+    return '<tr><td><span class="k">' + dsByK[r[0]].name + '</span></td>'
+      + '<td class="num">' + f3(r[1]) + '</td><td class="num">' + f3(r[2]) + '</td>' + d(r[3])
+      + '<td class="num">' + f3(r[4]) + '</td><td class="num">' + f3(r[5]) + '</td>' + d(r[6]) + '</tr>';
+  }).join("");
+
+  $("#stressRows").innerHTML = STRESS.map(function(r){
+    return '<tr><td><span class="k">' + byK[r[0]].full + '</span></td>'
+      + '<td class="num">' + f3(r[1]) + '</td><td class="num">' + f3(r[2]) + '</td>'
+      + '<td class="num neg">−' + f3(r[3]) + '</td>'
+      + '<td class="num">' + f3(r[4]) + '</td><td class="num">' + f3(r[5]) + '</td>'
+      + '<td class="num neg">−' + f3(r[6]) + '</td></tr>';
+  }).join("");
+
+  /* binary vs multi */
+  groupedBars("#bvmChart", GAP.map(function(r){
+    return { label: dsByK[r[0]].name.replace(/-/g,"‑"),
+             bars: [{v:r[1], cls:"a"}, {v:r[2], cls:"b"}] };
+  }));
+
+  /* ratio bars in the scratch section */
+  var ratios = [
+    {l:"Median serialised size", v:0.0265, txt:"0.027×"},
+    {l:"Median fit time",        v:10.5,   txt:"10.5×"},
+    {l:"Median prediction time", v:16.4,   txt:"16.4×"}
+  ];
+  $("#ratioBars").innerHTML = ratios.map(function(r){
+    var w = Math.min(100, (Math.log10(r.v) + 2) / 4 * 100);
+    var good = r.v < 1;
+    return '<div class="bar-row"><div class="name">' + r.l + '</div>'
+      + '<div class="bar-track"><div class="bar-fill' + (good ? "" : " hi") + '" data-w="' + w + '" style="width:0%"></div></div>'
+      + '<div class="val">' + r.txt + '</div></div>';
+  }).join("");
+  $("#ratioBars").insertAdjacentHTML("beforeend",
+    '<p class="dim" style="font-size:12px; margin-top:6px; font-family:var(--mono)">'
+    + 'scratch ÷ library, log scale — below 1× is cheaper</p>');
+})();
+
+/* =============================================================
+   RF LIBRARY vs SCRATCH
+   ============================================================= */
+function drawRF(task){
+  var bi = task === "binary" ? 1 : 4;
+  groupedBars("#rfChart", RFCMP.map(function(r){
+    return { label: dsByK[r[0]].name.replace(/-/g,"‑"),
+             bars: [{v:r[bi], cls:"c"}, {v:r[bi+1], cls:"d"}] };
+  }));
+}
+
+/* =============================================================
+   STRESS TEST
+   ============================================================= */
+function drawStress(task){
+  var bi = task === "binary" ? 1 : 4;
+  groupedBars("#stressChart", STRESS.map(function(r){
+    return { label: byK[r[0]].name, bars: [{v:r[bi], cls:"a"}, {v:r[bi+1], cls:"d"}] };
+  }), 0.9);
+}
+
+/* =============================================================
+   EFFICIENCY SCATTER (log-x)
+   ============================================================= */
+(function(){
+  var svg = $("#effChart");
+  var W = 760, H = 400, L = 62, R = 26, T = 26, B = 54;
+  var pw = W - L - R, ph = H - T - B;
+  var xMin = Math.log10(0.3), xMax = Math.log10(6000);
+  var yMin = 0.40, yMax = 0.87;
+  var X = function(s){ return L + (Math.log10(s) - xMin) / (xMax - xMin) * pw; };
+  var Y = function(v){ return T + ph - (v - yMin) / (yMax - yMin) * ph; };
+  var Rr = function(mb){ return 8 + 16 * Math.sqrt(Math.min(mb, 170) / 170); };
+
+  var s = "";
+  /* y gridlines */
+  [0.45,0.55,0.65,0.75,0.85].forEach(function(v){
+    s += '<line class="grid-l" x1="' + L + '" y1="' + Y(v) + '" x2="' + (W-R) + '" y2="' + Y(v) + '"/>'
+       + '<text x="' + (L-10) + '" y="' + (Y(v)+4) + '" text-anchor="end">' + v.toFixed(2) + '</text>';
+  });
+  /* x ticks */
+  [[1,"1 s"],[10,"10 s"],[60,"1 min"],[600,"10 min"],[3600,"1 h"]].forEach(function(t){
+    s += '<line class="grid-l" x1="' + X(t[0]) + '" y1="' + T + '" x2="' + X(t[0]) + '" y2="' + (T+ph) + '"/>'
+       + '<text x="' + X(t[0]) + '" y="' + (T+ph+20) + '" text-anchor="middle">' + t[1] + '</text>';
+  });
+  s += '<line class="axis" x1="' + L + '" y1="' + (T+ph) + '" x2="' + (W-R) + '" y2="' + (T+ph) + '"/>'
+     + '<line class="axis" x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + (T+ph) + '"/>'
+     + '<text class="ax-title" x="' + (L+pw/2) + '" y="' + (H-10) + '" text-anchor="middle">Median fit time per dataset–task case (log scale)</text>'
+     + '<text class="ax-title" x="' + (-(T+ph/2)) + '" y="16" transform="rotate(-90)" text-anchor="middle">Mean test macro-F1</text>';
+
+  /* label placement: right of the bubble, flipped left near the plot edge,
+     nudged vertically where two points would otherwise collide */
+  var NUDGE = {mlp:14, svm:-13, lr:0, ftt:0, dt:0, rf:0, rfs:0, gnb:0};
+  var FLIP  = {lr:true, ftt:true};
+  EFF.forEach(function(m){
+    var st = byK[m.k];
+    var fill = m.k === "rfs" ? "#d4566d" : m.k === "rf" ? "#2ac4a5" : "#4a7fc9";
+    var cx = X(m.fitS), cy = Y(m.mean), r = Rr(m.sizeMB);
+    var flip = FLIP[m.k] === true || cx > W - R - 120;
+    var lx = flip ? cx - r - 8 : cx + r + 8;
+    s += '<g class="pt" data-tip="' + st.full + '|' + f3(m.mean) + '|' + m.fitTxt + '|' + m.predTxt + '|' + m.sizeTxt + '">'
+       + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + fill + '"'
+       + ' fill-opacity="0.82" stroke="' + fill + '" stroke-width="1.5"/>'
+       + '<text x="' + lx + '" y="' + (cy + 4 + (NUDGE[m.k] || 0)) + '" text-anchor="' + (flip ? "end" : "start") + '"'
+       + ' style="font-family:var(--sans); font-size:12px; font-weight:700; fill:#dfeaf5">' + st.ab + '</text>'
+       + '</g>';
+  });
+  svg.innerHTML = s;
+
+  $$(".pt", svg).forEach(function(g){
+    g.style.cursor = "default";
+    g.addEventListener("mousemove", function(e){
+      var p = g.getAttribute("data-tip").split("|");
+      showTip(e, '<span class="tt">' + p[0] + '</span>macro-F1 <b>' + p[1] + '</b><br>'
+        + 'median fit <b>' + p[2] + '</b><br>median predict <b>' + p[3] + '</b><br>median size <b>' + p[4] + '</b>');
+    });
+    g.addEventListener("mouseleave", hideTip);
+  });
+})();
+
+/* =============================================================
+   CODE TABS
+   ============================================================= */
+(function(){
+  var panes = $("#codePanes");
+  function show(k){
+    panes.innerHTML = '<pre><code>' + CODE[k] + '</code></pre>';
+    $$("#codeTabs button").forEach(function(b){
+      b.setAttribute("aria-selected", String(b.getAttribute("data-code") === k));
+    });
+  }
+  $$("#codeTabs button").forEach(function(b){
+    b.addEventListener("click", function(){ show(b.getAttribute("data-code")); });
+  });
+  show("split");
+})();
+
+/* =============================================================
+   SEGMENTED CONTROLS
+   ============================================================= */
+function wireSeg(attr, fn){
+  $$('[data-' + attr + ']').forEach(function(b){
+    b.addEventListener("click", function(){
+      var group = b.parentNode;
+      $$('button', group).forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+      b.setAttribute("aria-pressed","true");
+      fn(b.getAttribute("data-" + attr));
+    });
+  });
+}
+wireSeg("lb", drawLeaderboard);
+wireSeg("hm", drawHeatmap);
+wireSeg("rf", drawRF);
+wireSeg("st", drawStress);
+
+drawLeaderboard("mean");
+drawHeatmap("all");
+drawRF("binary");
+drawStress("binary");
+
+/* =============================================================
+   SCROLL REVEAL + ACTIVE NAV
+   ============================================================= */
+(function(){
+  var rvs = $$(".rv");
+  if (!("IntersectionObserver" in window)) {
+    rvs.forEach(function(e){ e.classList.add("in"); animateBars(e); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting){ en.target.classList.add("in"); animateBars(en.target); io.unobserve(en.target); }
+      });
+    }, {rootMargin:"0px 0px -8% 0px", threshold:0.06});
+    rvs.forEach(function(e){ io.observe(e); });
+  }
+
+  var links = $$("#navlinks a");
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+  function onScroll(){
+    var y = window.scrollY + 120, cur = -1;
+    secs.forEach(function(s, i){ if (s && s.offsetTop <= y) cur = i; });
+    links.forEach(function(a, i){ a.classList.toggle("on", i === cur); });
+  }
+  var ticking = false;
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(function(){ onScroll(); ticking = false; }); }
+  }, {passive:true});
+  onScroll();
+})();
+
+})();
+</script>
+</body>
+</html>
